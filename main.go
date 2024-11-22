@@ -15,6 +15,7 @@ const (
 	INTERNAL
 	TOO_MANY_ARGS
 	NOT_A_DIR
+	EXLUSIVE_OPTS
 )
 var (
 	version bool
@@ -30,6 +31,7 @@ func main() {
 	// variables <<<
 	var Left  string
 	var Right string
+	var XORCnt int = 0
 	// >>>
 
 	// parse cli args <<<
@@ -41,10 +43,24 @@ func main() {
 	flag.Parse()
 	// >>>
 
-	// check if too many args <<<
+	// check cli args <<<
 	if flag.NArg() > 2 {
 		printError("too many args")
 		os.Exit(TOO_MANY_ARGS)
+	}
+
+	if size {
+		XORCnt += 1
+	}
+	if date {
+		XORCnt += 1
+	}
+	if crc32 {
+		XORCnt += 1
+	}
+	if XORCnt > 1 {
+		printError("-size, -date and -crc32 are mutual exclusive, use only one")
+		os.Exit(EXLUSIVE_OPTS)
 	}
 	// >>>
 

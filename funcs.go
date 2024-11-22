@@ -16,7 +16,7 @@ import ( // <<<
 	"github.com/charmbracelet/lipgloss"
 ) // >>>
 
-var (
+var ( // <<<
 	Dirname_r *regexp.Regexp = regexp.MustCompile("[^/]+/?$") // TODO rename variable
 	StyleRoot    = lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
 	StyleMissing = lipgloss.NewStyle().Background(lipgloss.Color("4"))
@@ -26,7 +26,7 @@ var (
 	StyleNewer   = lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
 	StyleOlder   = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	StyleDiff    = lipgloss.NewStyle().Foreground(lipgloss.Color("13"))
-)
+) // >>>
 
 func printHelp() {// <<<
   fmt.Println(" Usage of diffdir:")
@@ -63,6 +63,10 @@ func isFile(filepath string) bool {// <<<
 		return false
 	}
 	return !fileInfo.IsDir()
+}// >>>
+
+func isDir(dirpath string) bool {// <<<
+	return dirpath[len(dirpath)-1:] == "/"
 }// >>>
 
 func getSize(filepath string) int64 {// <<<
@@ -144,13 +148,20 @@ func colorizeElement(element string, root string, compareroot string) string {//
 	var Result string
 	var Dirname_s string = Dirname_r.FindString(element) // TODO rename variable
 
-	if isPath(root + element) && !isPath(compareroot + element) {
-		Result = StyleOrphan.Render(Dirname_s)
-	} else if !isPath(root + element) && isPath(compareroot + element) {
-		Result = StyleMissing.Render("      ")
-	} else {
-
-		if isFile(root + element) {
+	if isDir(element) { // expecting dir
+		if isDirectory(root + element) && !isDirectory(compareroot + element) { //isDirectory vs. !isDirectory (either missing or file) => blue
+			Result = StyleOrphan.Render(Dirname_s)
+		} else if !isDirectory(root + element) { // !isDirectory => blue background gap
+			Result = StyleMissing.Render("      ")
+		} else if isDirectory(root + element) && isDirectory(compareroot + element) { // isDirectory vs. isDirectory => no color
+			Result = Dirname_s
+		}
+	} else { // expecting file
+      if isFile(root + element) && !isFile(compareroot + element) { // isFile vs. !isFile (either missing or directory) => blue
+			Result = StyleOrphan.Render(Dirname_s)
+		} else if !isFile(root + element) { // !isFile => blue background gap
+			Result = StyleMissing.Render("      ")
+		}  else if isFile(root + element) && isFile(compareroot + element) { // isFile vs. isFile => no color or further tests (size, date, crc32)
 
 			if size {
 				filesize    := getSize(root + element)
@@ -185,12 +196,9 @@ func colorizeElement(element string, root string, compareroot string) string {//
 			} else {
 				Result = Dirname_s
 			}
-
-		} else {
-			Result = Dirname_s
 		}
 	}
-	
+
 	return Result
 }// >>>
 
@@ -208,7 +216,7 @@ func convertSliceToTree(union []string, root string, compareroot string) *tree.T
 
 		element := union[i]
 
-		if element[len(element)-1:] == "/" {
+		if isDir(element) {
 			CurrentDepth = len(strings.Split(element[:len(element)-1], "/")) - 1
 		} else {
 			CurrentDepth = len(strings.Split(element, "/")) - 1
