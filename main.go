@@ -8,8 +8,8 @@ import ( // <<<
 ) // >>>
 
 // global variables and constants <<<
-const Tool    string = "diffdir"
-const Version string = "0.1.0"
+const Tool_s    string = "diffdir"
+const Version_s string = "0.1.0"
 const (
 	OK int = iota
 	INTERNAL
@@ -18,11 +18,11 @@ const (
 	EXLUSIVE_OPTS
 )
 var (
-	version bool
-	help bool
-	size bool
-	date bool
-	crc32 bool
+	Version bool
+	Help bool
+	Size bool
+	Time bool
+	CRC32 bool
 )
 // >>>
 
@@ -35,11 +35,11 @@ func main() {
 	// >>>
 
 	// parse cli args <<<
-	flag.BoolVar(&version, "version", false, "print version"            )
-	flag.BoolVar(&help   , "help"   , false, "print help"               )
-	flag.BoolVar(&size   , "size"   , false, "compare file size"        )
-	flag.BoolVar(&date   , "date"   , false, "compare modification date")
-	flag.BoolVar(&crc32  , "crc32"  , false, "compare CRC32 checksum"   )
+	flag.BoolVar(&Version, "version", false, "print version"            )
+	flag.BoolVar(&Help   , "help"   , false, "print help"               )
+	flag.BoolVar(&Size   , "size"   , false, "compare file size"        )
+	flag.BoolVar(&Time   , "time"   , false, "compare modification time")
+	flag.BoolVar(&CRC32  , "crc32"  , false, "compare CRC32 checksum"   )
 	flag.Parse()
 	// >>>
 
@@ -49,31 +49,31 @@ func main() {
 		os.Exit(TOO_MANY_ARGS)
 	}
 
-	if size {
+	if Size {
 		XORCnt += 1
 	}
-	if date {
+	if Time {
 		XORCnt += 1
 	}
-	if crc32 {
+	if CRC32 {
 		XORCnt += 1
 	}
 	if XORCnt > 1 {
-		printError("-size, -date and -crc32 are mutual exclusive, use only one")
+		printError("-size, -time and -crc32 are mutual exclusive, use only one")
 		os.Exit(EXLUSIVE_OPTS)
 	}
 	// >>>
 
 	// print help <<<
-	if flag.NArg() == 0 || help {
+	if flag.NArg() == 0 || Help {
 		printHelp()
 		os.Exit(OK)
 	}
 	// >>>
 
 	// print version <<<
-	if version {
-		fmt.Println(Version)
+	if Version {
+		fmt.Println(Version_s)
 		os.Exit(OK)
 	}
 	// >>>

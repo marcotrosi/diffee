@@ -15,7 +15,8 @@ tool folder1 folder2    -> compare folders
    - set as root
    - navigate tree
    - open/close folders
--c/--color
+   - --filediffcmd="icdiff {} {}"  or env var
+-c/--color / --nocolor
 -d/--depth
 -t/--time
 -s/--size
@@ -25,7 +26,6 @@ tool folder1 folder2    -> compare folders
 --ignore
 --respect-vcs-ignore
 -a/--all
---filediffcmd="icdiff {} {}"  or env var
 -v/--version
 -h/--help
 

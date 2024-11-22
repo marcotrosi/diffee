@@ -37,7 +37,7 @@ func printHelp() {// <<<
 }// >>>
 
 func printError(msg string) {// <<<
-	fmt.Fprintln(os.Stderr, Tool + " error: " + msg)
+	fmt.Fprintln(os.Stderr, Tool_s + " error: " + msg)
 }// >>>
 
 func isPath(fpath string) bool {// <<<
@@ -163,7 +163,7 @@ func colorizeElement(element string, root string, compareroot string) string {//
 			Result = StyleMissing.Render("      ")
 		}  else if isFile(root + element) && isFile(compareroot + element) { // isFile vs. isFile => no color or further tests (size, date, crc32)
 
-			if size {
+			if Size {
 				filesize    := getSize(root + element)
 				comparesize := getSize(compareroot + element)
 
@@ -174,7 +174,7 @@ func colorizeElement(element string, root string, compareroot string) string {//
 				} else {
 					Result = Dirname_s
 				}
-			} else if date {
+			} else if Time {
 				filedate    := getModTime(root + element)
 				comparedate := getModTime(compareroot + element)
 
@@ -185,7 +185,7 @@ func colorizeElement(element string, root string, compareroot string) string {//
 				} else {
 					Result = Dirname_s
 				}
-			} else if crc32 {
+			} else if CRC32 {
 				filechecksum   ,_ := checksum.CRC32(root + element)        // TODO eval error
 				comparechecksum,_ := checksum.CRC32(compareroot + element) // TODO eval error
 				if filechecksum != comparechecksum {
