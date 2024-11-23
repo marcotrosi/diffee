@@ -23,6 +23,8 @@ var (
 	Size bool
 	Time bool
 	CRC32 bool
+	Swap bool
+	Depth int
 )
 // >>>
 
@@ -35,11 +37,13 @@ func main() {
 	// >>>
 
 	// parse cli args <<<
-	flag.BoolVar(&Version, "version", false, "print version"            )
-	flag.BoolVar(&Help   , "help"   , false, "print help"               )
-	flag.BoolVar(&Size   , "size"   , false, "compare file size"        )
-	flag.BoolVar(&Time   , "time"   , false, "compare modification time")
-	flag.BoolVar(&CRC32  , "crc32"  , false, "compare CRC32 checksum"   )
+	flag.BoolVar(&Version, "version", false, "print version"             )
+	flag.BoolVar(&Help   , "help"   , false, "print help"                )
+	flag.BoolVar(&Size   , "size"   , false, "compare file size"         )
+	flag.BoolVar(&Time   , "time"   , false, "compare modification time" )
+	flag.BoolVar(&CRC32  , "crc32"  , false, "compare CRC32 checksum"    )
+	flag.BoolVar(&Swap   , "swap"   , false, "swap sides"                )
+	flag.IntVar(&Depth   , "depth"  , 0    , "limit depth, 0 is no limit")
 	flag.Parse()
 	// >>>
 

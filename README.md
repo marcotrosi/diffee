@@ -15,11 +15,13 @@ tool folder1 folder2    -> compare folders
    - set as root
    - navigate tree
    - open/close folders
+   - swap sides
    - --filediffcmd="icdiff {} {}"  or env var
 -c/--color / --nocolor
 -d/--depth
 -t/--time
 -s/--size
+-w/--swap
 --dirs-first
 --md5 or diff/cmp
 --exclude

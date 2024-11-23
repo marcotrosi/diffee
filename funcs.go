@@ -118,6 +118,14 @@ func getDirContents(left string, right string) []string {// <<<
 		}
 
 		fpath = path.Clean(strings.Replace(fpath, Root + "/", "", 1))
+
+		if Depth != 0 {
+			fmt.Println(fpath, strings.Count(fpath, string(os.PathSeparator)))
+			if strings.Count(fpath, string(os.PathSeparator)) >= Depth {
+				return filepath.SkipDir
+			}
+		}
+
 		if info.IsDir() {
 			ListOfPaths = append(ListOfPaths, fpath + "/")
 		} else {
@@ -250,10 +258,16 @@ func printSideBySide(union []string, leftroot string, rightroot string) {// <<<
 	var righttree = convertSliceToTree(union, rightroot, leftroot)
 	var whitespace string = "          "
 	var offset []string
+	var output string
 	for range union {
 		offset = append(offset, whitespace)
 	}
-	var str string = lipgloss.JoinHorizontal(lipgloss.Top, lefttree.String(), strings.Join(offset[:], "\n"), righttree.String())
-	fmt.Println(str)
+
+	if Swap {
+		output = lipgloss.JoinHorizontal(lipgloss.Top, righttree.String(), strings.Join(offset[:], "\n"), lefttree.String())
+	} else {
+		output = lipgloss.JoinHorizontal(lipgloss.Top, lefttree.String(), strings.Join(offset[:], "\n"), righttree.String())
+	}
+	fmt.Println(output)
 }// >>>
 
