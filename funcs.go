@@ -120,7 +120,6 @@ func getDirContents(left string, right string) []string {// <<<
 		fpath = path.Clean(strings.Replace(fpath, Root + "/", "", 1))
 
 		if Depth != 0 {
-			fmt.Println(fpath, strings.Count(fpath, string(os.PathSeparator)))
 			if strings.Count(fpath, string(os.PathSeparator)) >= Depth {
 				return filepath.SkipDir
 			}
