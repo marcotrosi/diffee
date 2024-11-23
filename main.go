@@ -19,12 +19,13 @@ const (
 )
 var (
 	Version bool
-	Help bool
-	Size bool
-	Time bool
-	CRC32 bool
-	Swap bool
-	Depth int
+	Help    bool
+	All     bool
+	Size    bool
+	Time    bool
+	CRC32   bool
+	Swap    bool
+	Depth   int
 	NoColor bool
 )
 // >>>
@@ -40,6 +41,7 @@ func main() {
 	// parse cli args <<<
 	flag.BoolVar(&Version, "version", false, "print version"             )
 	flag.BoolVar(&Help   , "help"   , false, "print help"                )
+	flag.BoolVar(&All    , "all"    , false, "don't ignore dotfiles"     )
 	flag.BoolVar(&Size   , "size"   , false, "compare file size"         )
 	flag.BoolVar(&Time   , "time"   , false, "compare modification time" )
 	flag.BoolVar(&CRC32  , "crc32"  , false, "compare CRC32 checksum"    )

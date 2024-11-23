@@ -130,6 +130,17 @@ func getDirContents(left string, right string) []string {// <<<
 
 		fpath = path.Clean(strings.Replace(fpath, Root + "/", "", 1))
 
+		if All == false {
+			NameChunk_s := Dirname_r.FindString(fpath)
+			if NameChunk_s[:1] == "." {
+				if info.IsDir() {
+					return filepath.SkipDir
+				} else {
+					return nil
+				}
+			}
+		}
+
 		if Depth != 0 {
 			if strings.Count(fpath, string(os.PathSeparator)) >= Depth {
 				return filepath.SkipDir
