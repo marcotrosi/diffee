@@ -17,15 +17,20 @@ tool folder1 folder2    -> compare folders
    - open/close folders
    - swap sides
    - --filediffcmd="icdiff {} {}"  or env var
--c/--color / --nocolor
+-c/--color or -n -C/--nocolor
 -d/--depth
 -t/--time
 -s/--size
+--crc32
+-o/--orphans
+-O/--noorphans
+--same
+--diff
 -w/--swap
---dirs-first
---md5 or diff/cmp
 --exclude
+--include
 --ignore
+--dirs-first
 --respect-vcs-ignore
 -a/--all
 -v/--version

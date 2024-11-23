@@ -40,6 +40,17 @@ func printError(msg string) {// <<<
 	fmt.Fprintln(os.Stderr, Tool_s + " error: " + msg)
 }// >>>
 
+func setNoColor() {// <<<
+	StyleRoot    = lipgloss.NewStyle()
+	StyleMissing = lipgloss.NewStyle()
+	StyleOrphan  = lipgloss.NewStyle()
+	StyleBigger  = lipgloss.NewStyle()
+	StyleSmaller = lipgloss.NewStyle()
+	StyleNewer   = lipgloss.NewStyle()
+	StyleOlder   = lipgloss.NewStyle()
+	StyleDiff    = lipgloss.NewStyle()
+}// >>>
+
 func isPath(fpath string) bool {// <<<
 	_, err := os.Stat(fpath)
 	if err != nil {

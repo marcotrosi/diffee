@@ -25,6 +25,7 @@ var (
 	CRC32 bool
 	Swap bool
 	Depth int
+	NoColor bool
 )
 // >>>
 
@@ -44,6 +45,7 @@ func main() {
 	flag.BoolVar(&CRC32  , "crc32"  , false, "compare CRC32 checksum"    )
 	flag.BoolVar(&Swap   , "swap"   , false, "swap sides"                )
 	flag.IntVar(&Depth   , "depth"  , 0    , "limit depth, 0 is no limit")
+	flag.BoolVar(&NoColor, "nocolor", false, "turn colored output off"   )
 	flag.Parse()
 	// >>>
 
@@ -79,6 +81,12 @@ func main() {
 	if Version {
 		fmt.Println(Version_s)
 		os.Exit(OK)
+	}
+	// >>>
+
+	// no color <<<
+	if NoColor {
+		setNoColor()
 	}
 	// >>>
 
