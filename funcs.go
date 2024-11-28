@@ -246,9 +246,9 @@ func convertSliceToTree(union []string, root string, compareroot string) *tree.T
 		element := union[i]
 
 		if isDir(element) {
-			CurrentDepth = len(strings.Split(element[:len(element)-1], "/")) - 1
+			CurrentDepth = len(strings.Split(element[:len(element)-1], "/")) - 1 // TODO use Count function
 		} else {
-			CurrentDepth = len(strings.Split(element, "/")) - 1
+			CurrentDepth = len(strings.Split(element, "/")) - 1 // TODO use Count function
 		}
 
 		if CurrentDepth > LastDepth {

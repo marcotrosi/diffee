@@ -1,4 +1,7 @@
-
+diffy
+alter ego -> ae
+dorian grey -> dg
+crown and roots -> cr
 tool folder             -> compare to current dir
 tool folder1 folder2    -> compare folders
 
