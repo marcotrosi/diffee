@@ -368,7 +368,7 @@ func printSideBySide(left *[]Entry, right *[]Entry) {// <<<
 
 	var LeftTree  = convertSliceToTree(left)
 	var RightTree = convertSliceToTree(right)
-	var Whitespace string = "          "
+	var Whitespace string = strings.Repeat(" ", 10)
 	var Offset []string
 	var Output string
 	for range *left {
@@ -383,3 +383,10 @@ func printSideBySide(left *[]Entry, right *[]Entry) {// <<<
 	fmt.Println(Output)
 }// >>>
 
+func printFlat(left *[]Entry, right *[]Entry) {// <<<
+	leftroot  := (*left)[0].Path
+	rightroot := (*right)[0].Path
+	for i:=1; i < len(*left); i++ {
+		fmt.Printf("%q %q\n", leftroot+(*left)[i].Path, rightroot+(*right)[i].Path)
+	}
+}// >>>

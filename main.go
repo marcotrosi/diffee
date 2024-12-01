@@ -20,6 +20,7 @@ const (
 var (
 	Version bool
 	Help    bool
+	Flat    bool
 	All     bool
 	Size    bool
 	Time    bool
@@ -36,7 +37,6 @@ func main() {
 	var Left  string
 	var Right string
 	var XORCnt int = 0
-	// var UnionSetOfDirContents = []string{}
 	var UnionSetOfDirContents []string
 	var LeftDirContents  []Entry
 	var RightDirContents []Entry
@@ -45,6 +45,7 @@ func main() {
 	// parse cli args <<<
 	flag.BoolVar(&Version, "version", false, "print version"             )
 	flag.BoolVar(&Help   , "help"   , false, "print help"                )
+	flag.BoolVar(&Flat   , "flat"   , false, "print differences flat"    )
 	flag.BoolVar(&All    , "all"    , false, "don't ignore dotfiles"     )
 	flag.BoolVar(&Size   , "size"   , false, "compare file size"         )
 	flag.BoolVar(&Time   , "time"   , false, "compare modification time" )
@@ -124,9 +125,18 @@ func main() {
 	// >>>
 
 	// print flat comparison
+	if Flat {
+		printFlat(&LeftDirContents, &RightDirContents)
+		os.Exit(OK)
+	}
 	
 	// start interactive comparison
+	// if Interactive {
+		// runInteractive(&LeftDirContents, &RightDirContents)
+		// os.Exit(OK)
+	// }
 
 	// print side by side comparison
 	printSideBySide(&LeftDirContents, &RightDirContents)
+	os.Exit(OK)
 }
