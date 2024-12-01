@@ -16,8 +16,25 @@ import ( // <<<
 	"github.com/charmbracelet/lipgloss"
 ) // >>>
 
+type Entry struct {// <<<
+	Path      string
+	Name      string
+	IsDir     bool
+	Size      int64
+	ModTime   time.Time
+	IsMissing bool
+	IsOrphan  bool
+	IsBigger  bool
+	IsSmaller bool
+	IsNewer   bool
+	IsOlder   bool
+	IsDiff    bool
+	IsDotfile bool
+	Checksum  string
+}// >>>
+
 var ( // <<<
-	Dirname_r *regexp.Regexp = regexp.MustCompile("[^/]+/?$") // TODO rename variable
+	NameRegEx *regexp.Regexp = regexp.MustCompile("[^/]+/?$")
 	StyleRoot    = lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
 	StyleMissing = lipgloss.NewStyle().Background(lipgloss.Color("4"))
 	StyleOrphan  = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
@@ -29,11 +46,11 @@ var ( // <<<
 ) // >>>
 
 func printHelp() {// <<<
-  fmt.Println(" Usage of diffdir:")
-  fmt.Println("-help")
-  fmt.Println("  	print help")
-  fmt.Println("-version")
-  fmt.Println("  	print version")
+	fmt.Println(" Usage of diffdir:")
+	fmt.Println("-help")
+	fmt.Println("  	print help")
+	fmt.Println("-version")
+	fmt.Println("  	print version")
 }// >>>
 
 func printError(msg string) {// <<<
@@ -51,13 +68,8 @@ func setNoColor() {// <<<
 	StyleDiff    = lipgloss.NewStyle()
 }// >>>
 
-func isPath(fpath string) bool {// <<<
-	_, err := os.Stat(fpath)
-	if err != nil {
-		return false
-	} else {
-		return true
-	}
+func isDir(dirpath string) bool {// <<<
+	return dirpath[len(dirpath)-1:] == "/"
 }// >>>
 
 func isDirectory(dirpath string) bool {// <<<
@@ -68,54 +80,28 @@ func isDirectory(dirpath string) bool {// <<<
 	return fileInfo.IsDir()
 }// >>>
 
-func isFile(filepath string) bool {// <<<
-	fileInfo, err := os.Stat(filepath)
-	if err != nil {
-		return false
+func removeDuplicates(sortedSlice *[]string) {// <<<
+
+	if len(*sortedSlice) == 0 {
+		return
 	}
-	return !fileInfo.IsDir()
-}// >>>
 
-func isDir(dirpath string) bool {// <<<
-	return dirpath[len(dirpath)-1:] == "/"
-}// >>>
+	var WrIdx int = 0
 
-func getSize(filepath string) int64 {// <<<
-	fileInfo, err := os.Stat(filepath)
-	if err != nil {
-		return 0
+	for RdIdx := 1; RdIdx < len(*sortedSlice); RdIdx++ {
+
+		if (*sortedSlice)[RdIdx] != (*sortedSlice)[WrIdx] {
+			WrIdx = WrIdx + 1
+		}
+
+		(*sortedSlice)[WrIdx] = (*sortedSlice)[RdIdx]
 	}
-	return fileInfo.Size()
+
+	 (*sortedSlice) = (*sortedSlice)[:WrIdx+1]
 }// >>>
 
-func getModTime(filepath string) time.Time {// <<<
-	fileInfo, err := os.Stat(filepath)
-	if err != nil {
-		return time.Now()
-	}
-	return fileInfo.ModTime()
-}// >>>
+func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) {// <<<
 
-func removeDuplicates(sortedSlice []string) []string {// <<<
-    if len(sortedSlice) == 0 {
-        return sortedSlice
-    }
-
-    // Initialize a new slice to store unique values
-    result := []string{sortedSlice[0]} // Start with the first element
-
-    for i := 1; i < len(sortedSlice); i++ {
-        // If current element is different from the last element in the result
-        if sortedSlice[i] != result[len(result)-1] {
-            result = append(result, sortedSlice[i])
-        }
-    }
-    return result
-}// >>>
-
-func getDirContents(left string, right string) []string {// <<<
-
-	var ListOfPaths []string
 	var Root string
 
 	WalkerFunc := func(fpath string, info fs.FileInfo, err error) error {
@@ -124,14 +110,14 @@ func getDirContents(left string, right string) []string {// <<<
 		}
 
 		if fpath == Root {
-			ListOfPaths = append(ListOfPaths, ".")
+			*ListOfPaths = append(*ListOfPaths, ".")
 			return nil
 		}
 
-		fpath = path.Clean(strings.Replace(fpath, Root + "/", "", 1))
+		fpath = path.Clean(strings.Replace(fpath, Root, "", 1))
 
 		if All == false {
-			NameChunk_s := Dirname_r.FindString(fpath)
+			NameChunk_s := NameRegEx.FindString(fpath)
 			if NameChunk_s[:1] == "." {
 				if info.IsDir() {
 					return filepath.SkipDir
@@ -148,9 +134,9 @@ func getDirContents(left string, right string) []string {// <<<
 		}
 
 		if info.IsDir() {
-			ListOfPaths = append(ListOfPaths, fpath + "/")
+			*ListOfPaths = append(*ListOfPaths, fpath + "/")
 		} else {
-			ListOfPaths = append(ListOfPaths, fpath)
+			*ListOfPaths = append(*ListOfPaths, fpath)
 		}
 
 		return nil
@@ -167,128 +153,233 @@ func getDirContents(left string, right string) []string {// <<<
 		fmt.Println(err)
 	}
 
-	sort.Strings(ListOfPaths)
-	ListOfPaths = removeDuplicates(ListOfPaths)
+	sort.Strings(*ListOfPaths)
+	removeDuplicates(ListOfPaths)
 
-	return ListOfPaths
 }// >>>
 
-func colorizeElement(element string, root string, compareroot string) string {// <<<
-	var Result string
-	var Dirname_s string = Dirname_r.FindString(element) // TODO rename variable
+func getDirContents(leftroot string, rightroot string, unionset *[]string, leftcontent *[]Entry, rightcontent *[]Entry) {// <<<
 
-	if isDir(element) { // expecting dir
-		if isDirectory(root + element) && !isDirectory(compareroot + element) { //isDirectory vs. !isDirectory (either missing or file) => blue
-			Result = StyleOrphan.Render(Dirname_s)
-		} else if !isDirectory(root + element) { // !isDirectory => blue background gap
-			Result = StyleMissing.Render("      ")
-		} else if isDirectory(root + element) && isDirectory(compareroot + element) { // isDirectory vs. isDirectory => no color
-			Result = Dirname_s
+	*leftcontent  = append(*leftcontent , Entry{Path : leftroot })
+	*rightcontent = append(*rightcontent, Entry{Path : rightroot})
+
+	for i:=1 ; i < len(*unionset) ; i++ {
+
+		LeftPath  := leftroot  + (*unionset)[i]
+		RightPath := rightroot + (*unionset)[i]
+		NormPath  := (*unionset)[i]
+		IsDotfile := false
+
+		Name  := NameRegEx.FindString(NormPath)
+		if Name[:1] == "." {
+			IsDotfile = true
 		}
-	} else { // expecting file
-      if isFile(root + element) && !isFile(compareroot + element) { // isFile vs. !isFile (either missing or directory) => blue
-			Result = StyleOrphan.Render(Dirname_s)
-		} else if !isFile(root + element) { // !isFile => blue background gap
-			Result = StyleMissing.Render("      ")
-		}  else if isFile(root + element) && isFile(compareroot + element) { // isFile vs. isFile => no color or further tests (size, date, crc32)
 
-			if Size {
-				filesize    := getSize(root + element)
-				comparesize := getSize(compareroot + element)
+		LeftFileInfo , LErr := os.Stat(LeftPath)
+		RightFileInfo, RErr := os.Stat(RightPath)
 
-				if filesize > comparesize {
-					Result = StyleBigger.Render(Dirname_s) + " (" + strconv.FormatInt(int64(filesize), 10) + " bytes)"
-				} else if filesize < comparesize {
-					Result = StyleSmaller.Render(Dirname_s) + " (" + strconv.FormatInt(int64(filesize), 10) + " bytes)"
-				} else {
-					Result = Dirname_s
-				}
-			} else if Time {
-				filedate    := getModTime(root + element)
-				comparedate := getModTime(compareroot + element)
+		var LeftIsDir      bool      = isDir(Name)
+		var LeftSize       int64     = 0
+		var LeftModTime    time.Time = time.Time{}
+		var LeftChecksum   string    = ""
+		var LeftIsOrphan   bool      = false
+		var LeftIsMissing  bool      = false
+		var LeftIsBigger   bool      = false
+		var LeftIsSmaller  bool      = false
+		var LeftIsNewer    bool      = false
+		var LeftIsOlder    bool      = false
 
-				if filedate.After(comparedate) {
-					Result = StyleNewer.Render(Dirname_s) + " (" + filedate.Format(time.RFC3339) + ")"
-				} else if filedate.Before(comparedate) {
-					Result = StyleOlder.Render(Dirname_s) + " (" + filedate.Format(time.RFC3339) + ")"
-				} else {
-					Result = Dirname_s
-				}
-			} else if CRC32 {
-				filechecksum   ,_ := checksum.CRC32(root + element)        // TODO eval error
-				comparechecksum,_ := checksum.CRC32(compareroot + element) // TODO eval error
-				if filechecksum != comparechecksum {
-					Result = StyleDiff.Render(Dirname_s)
-				} else {
-					Result = Dirname_s
-				}
-			} else {
-				Result = Dirname_s
+		var RightIsDir     bool      = isDir(Name)
+		var RightSize      int64     = 0
+		var RightModTime   time.Time = time.Time{}
+		var RightChecksum  string    = ""
+		var RightIsOrphan  bool      = false
+		var RightIsMissing bool      = false
+		var RightIsBigger  bool      = false
+		var RightIsSmaller bool      = false
+		var RightIsNewer   bool      = false
+		var RightIsOlder   bool      = false
+
+		if LErr != nil {
+			LeftIsMissing = true
+		} else if LeftIsDir != LeftFileInfo.IsDir() {
+			LeftIsMissing = true
+		} else {
+			if LeftIsDir == false {
+				LeftSize       = LeftFileInfo.Size()
+				LeftModTime    = LeftFileInfo.ModTime()
+				LeftChecksum,_ = checksum.CRC32(LeftPath)
 			}
+		}
+
+		if RErr != nil {
+			RightIsMissing = true
+		} else if RightIsDir != RightFileInfo.IsDir() {
+			RightIsMissing = true
+		} else {
+			if RightIsDir == false {
+				RightSize       = RightFileInfo.Size()
+				RightModTime    = RightFileInfo.ModTime()
+				RightChecksum,_ = checksum.CRC32(RightPath)
+			}
+		}
+
+		if LeftIsMissing {
+			RightIsOrphan = true
+		} else {
+			if LeftIsDir == false {
+				LeftIsBigger  = (LeftSize > RightSize)
+				LeftIsSmaller = (LeftSize < RightSize)
+				LeftIsNewer   = LeftModTime.After(RightModTime)
+				LeftIsOlder   = LeftModTime.Before(RightModTime)
+			}
+		}
+
+		if RightIsMissing {
+			LeftIsOrphan = true
+		} else {
+			if RightIsDir == false {
+				RightIsBigger  = (RightSize > LeftSize)
+				RightIsSmaller = (RightSize < LeftSize)
+				RightIsNewer   = RightModTime.After(LeftModTime)
+				RightIsOlder   = RightModTime.Before(LeftModTime)
+			}
+		}
+
+		LeftEntry := Entry{
+			Path      : NormPath,
+			Name      : Name,
+			IsMissing : LeftIsMissing,
+			IsOrphan  : LeftIsOrphan,
+			IsDir     : LeftIsDir,
+			Size      : LeftSize,
+			ModTime   : LeftModTime,
+			IsDotfile : IsDotfile,
+			IsBigger  : LeftIsBigger,
+			IsSmaller : LeftIsSmaller,
+			IsNewer   : LeftIsNewer,
+			IsOlder   : LeftIsOlder,
+			IsDiff    : (LeftChecksum != RightChecksum),
+			Checksum  : LeftChecksum }
+		*leftcontent = append(*leftcontent, LeftEntry)
+
+		RightEntry := Entry{
+			Path      : NormPath,
+			Name      : Name,
+			IsMissing : RightIsMissing,
+			IsOrphan  : RightIsOrphan,
+			IsDir     : RightIsDir,
+			Size      : RightSize,
+			ModTime   : RightModTime,
+			IsDotfile : IsDotfile,
+			IsBigger  : RightIsBigger,
+			IsSmaller : RightIsSmaller,
+			IsNewer   : RightIsNewer,
+			IsOlder   : RightIsOlder,
+			IsDiff    : (RightChecksum != LeftChecksum),
+			Checksum  : RightChecksum }
+		*rightcontent = append(*rightcontent, RightEntry)
+	}
+
+}// >>>
+
+func decorateText(entry *Entry) string {// <<<
+
+	if (*entry).IsMissing {
+		return StyleMissing.Render(strings.Repeat(" ", len((*entry).Name)))
+	}
+
+	if (*entry).IsOrphan {
+		return StyleOrphan.Render((*entry).Name)
+	}
+
+	if Size {
+
+		if (*entry).IsBigger {
+			return StyleBigger.Render((*entry).Name) + " (" + strconv.FormatInt(int64((*entry).Size), 10) + " bytes)"
+		}
+
+		if (*entry).IsSmaller {
+			return StyleSmaller.Render((*entry).Name) + " (" + strconv.FormatInt(int64((*entry).Size), 10) + " bytes)"
 		}
 	}
 
-	return Result
+	if Time {
+
+		if (*entry).IsNewer {
+			return StyleNewer.Render((*entry).Name) + " (" + (*entry).ModTime.Format(time.RFC3339) + ")"
+		}
+
+		if (*entry).IsOlder {
+			return StyleOlder.Render((*entry).Name) + " (" + (*entry).ModTime.Format(time.RFC3339) + ")"
+		}
+	}
+
+	if CRC32 {
+		if (*entry).IsDiff {
+			return StyleDiff.Render((*entry).Name) + " (" + (*entry).Checksum + ")"
+		}
+	}
+
+	return (*entry).Name
 }// >>>
 
-func convertSliceToTree(union []string, root string, compareroot string) *tree.Tree {// <<<
+func convertSliceToTree(content *[]Entry) *tree.Tree {// <<<
 
-	var Result *tree.Tree = tree.Root(StyleRoot.Render(root))
+	var Result *tree.Tree = tree.Root(StyleRoot.Render((*content)[0].Path))
 	var Stack []*tree.Tree
 	var LastDepth    int = 0
 	var CurrentDepth int = 0
-	var ColoredElement_s string
+	var DecoratedText string
 
 	Stack = append(Stack, Result)
 
-	for i := 1; i < len(union); i++ {
+	for i := 1; i < len(*content); i++ {
 
-		element := union[i]
+		Entry := (*content)[i]
 
-		if isDir(element) {
-			CurrentDepth = len(strings.Split(element[:len(element)-1], "/")) - 1 // TODO use Count function
-		} else {
-			CurrentDepth = len(strings.Split(element, "/")) - 1 // TODO use Count function
+		CurrentDepth = strings.Count(Entry.Path, "/")
+		if Entry.IsDir {
+			CurrentDepth = CurrentDepth - 1
 		}
 
 		if CurrentDepth > LastDepth {
 			LastChildren := Stack[LastDepth].Children()
 			Stack = append(Stack, LastChildren.At(LastChildren.Length()-1).(*tree.Tree))
 			LastDepth = CurrentDepth
-		}
-
-		if CurrentDepth < LastDepth {
-			Stack = Stack[:len(Stack)-1]
+		} else if CurrentDepth < LastDepth {
+			Stack = Stack[:len(Stack)-(LastDepth-CurrentDepth)]
 			LastDepth = CurrentDepth
 		}
 
-		ColoredElement_s = colorizeElement(element, root, compareroot)
+		DecoratedText = decorateText(&Entry)
 
-		if element[len(element)-1:] == "/" {
-			Stack[LastDepth].Child(tree.Root(ColoredElement_s))
+		if Entry.IsDir {
+			Stack[LastDepth].Child(tree.Root(DecoratedText))
 		} else {
-			Stack[LastDepth].Child(ColoredElement_s)
+			Stack[LastDepth].Child(DecoratedText)
 		}
 
 	}
 	return Result
 }// >>>
 
-func printSideBySide(union []string, leftroot string, rightroot string) {// <<<
-	var lefttree  = convertSliceToTree(union, leftroot, rightroot)
-	var righttree = convertSliceToTree(union, rightroot, leftroot)
-	var whitespace string = "          "
-	var offset []string
-	var output string
-	for range union {
-		offset = append(offset, whitespace)
+func printSideBySide(left *[]Entry, right *[]Entry) {// <<<
+
+	var LeftTree  = convertSliceToTree(left)
+	var RightTree = convertSliceToTree(right)
+	var Whitespace string = "          "
+	var Offset []string
+	var Output string
+	for range *left {
+		Offset = append(Offset, Whitespace)
 	}
 
 	if Swap {
-		output = lipgloss.JoinHorizontal(lipgloss.Top, righttree.String(), strings.Join(offset[:], "\n"), lefttree.String())
+		Output = lipgloss.JoinHorizontal(lipgloss.Top, RightTree.String(), strings.Join(Offset[:], "\n"), LeftTree.String())
 	} else {
-		output = lipgloss.JoinHorizontal(lipgloss.Top, lefttree.String(), strings.Join(offset[:], "\n"), righttree.String())
+		Output = lipgloss.JoinHorizontal(lipgloss.Top, LeftTree.String(), strings.Join(Offset[:], "\n"), RightTree.String())
 	}
-	fmt.Println(output)
+	fmt.Println(Output)
 }// >>>
 

@@ -36,6 +36,10 @@ func main() {
 	var Left  string
 	var Right string
 	var XORCnt int = 0
+	// var UnionSetOfDirContents = []string{}
+	var UnionSetOfDirContents []string
+	var LeftDirContents  []Entry
+	var RightDirContents []Entry
 	// >>>
 
 	// parse cli args <<<
@@ -94,11 +98,11 @@ func main() {
 
 	// get directory paths from args <<<
 	if flag.NArg() == 1 {
-		Left  = "."
-		Right = path.Clean(flag.Arg(0))
+		Left  = "./"
+		Right = path.Clean(flag.Arg(0)) + "/"
 	} else { // 2 args given
-		Left  = path.Clean(flag.Arg(0))
-		Right = path.Clean(flag.Arg(1))
+		Left  = path.Clean(flag.Arg(0)) + "/"
+		Right = path.Clean(flag.Arg(1)) + "/"
 	}
 	// >>>
 
@@ -115,7 +119,8 @@ func main() {
 	// >>>
 
 	// get dir contents <<<
-	var UnionSetOfDirContents = getDirContents(Left, Right)
+	getUnionSetOfDirContents(Left, Right, &UnionSetOfDirContents)
+	getDirContents(Left, Right, &UnionSetOfDirContents, &LeftDirContents, &RightDirContents)
 	// >>>
 
 	// print flat comparison
@@ -123,5 +128,5 @@ func main() {
 	// start interactive comparison
 
 	// print side by side comparison
-	printSideBySide(UnionSetOfDirContents, Left + "/", Right + "/")
+	printSideBySide(&LeftDirContents, &RightDirContents)
 }
