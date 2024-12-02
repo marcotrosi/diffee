@@ -2,17 +2,19 @@
 
 `diffdir` is a commandline folder comparison tool that offers a variety of outputs.
 
-alternative names: diffy, alter ego -> ae, dorian gray -> dg, crown and roots -> cr
-
 
 ## Background
 
-I'm very much used to `Beyond Compare` at work, but they didn't provide a proper version for macOS and I also need
-something for the commandline. I wasn't able to find a commandline tool in my package manager to diff directories in a similar fashion.
-Then I searched on Github and there are many repos with names like _cmpdir_, _dircmp_ or any other combination with the
-words _[cmp|diff]+[dir(s)|folder(s)|tree(s)]_, but none of them provides screenshots or a good description, so I assume
-they are not doing what I need. So I created this tool with with tools like `Beyond Compare`, `icdiff`, `diff -y` and
-`tree` in mind.
+I'm very much used to `Beyond Compare 4` at work, but they didn't provide a proper version for macOS and I also need
+something for the commandline. In the meantime `Beyond Compare 5` was released. I wasn't able to find a commandline tool
+in my package manager to diff directories in a similar fashion. Then I searched on Github and there are many repos with
+names like `cmpdir`, `dircmp` or any other combination with the words `[cmp|diff]+[dir(s)|folder(s)|tree(s)]`, but none
+of them provides screenshots or a good description, so I assume they are not doing what I need. So I created this tool
+with tools like
+[`Beyond Compare`](https://www.scootersoftware.com),
+[`icdiff`](https://github.com/jeffkaufman/icdiff),
+[`diff -y`](https://www.gnu.org/software/diffutils/) and
+[`tree`](https://github.com/Old-Man-Programmer/tree) in mind.
 
 
 ## Disclaimer
