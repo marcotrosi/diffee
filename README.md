@@ -44,6 +44,8 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- Use file size to detect if files are different.
 - 🟢 `--time/-t`
 	- Use modification time to detect if files are different.
+- 🟢 `--info`
+	- Print information on differences (checksum, size, modtime).
 - 🟢 `--swap/-w`
 	- Swap sides.
 - 🟢 `--nocolor/-n`
@@ -88,7 +90,6 @@ There is also the future idea to provide an interactive mode which brings it muc
 	- swap sides
 	- --filediffcmd="icdiff {} {}"  or env var
 - `-u/--unified`
-- `--dirs-first`
 - `--respect-vcs-ignore`
 
 Maybe the performance can be improved by using multi-threading?

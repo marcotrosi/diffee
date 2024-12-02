@@ -295,29 +295,62 @@ func decorateText(entry *Entry) string {// <<<
 
 	if Size {
 
-		if (*entry).IsBigger {
-			return StyleBigger.Render((*entry).Name) + " (" + strconv.FormatInt(int64((*entry).Size), 10) + " bytes)"
-		}
+		if Info {
 
-		if (*entry).IsSmaller {
-			return StyleSmaller.Render((*entry).Name) + " (" + strconv.FormatInt(int64((*entry).Size), 10) + " bytes)"
+			if (*entry).IsBigger {
+				return StyleBigger.Render((*entry).Name) + " (" + strconv.FormatInt(int64((*entry).Size), 10) + " bytes)"
+			}
+
+			if (*entry).IsSmaller {
+				return StyleSmaller.Render((*entry).Name) + " (" + strconv.FormatInt(int64((*entry).Size), 10) + " bytes)"
+			}
+		} else {
+
+			if (*entry).IsBigger {
+				return StyleBigger.Render((*entry).Name)
+			}
+
+			if (*entry).IsSmaller {
+				return StyleSmaller.Render((*entry).Name)
+			}
 		}
 	}
 
 	if Time {
 
-		if (*entry).IsNewer {
-			return StyleNewer.Render((*entry).Name) + " (" + (*entry).ModTime.Format(time.RFC3339) + ")"
-		}
+		if Info {
 
-		if (*entry).IsOlder {
-			return StyleOlder.Render((*entry).Name) + " (" + (*entry).ModTime.Format(time.RFC3339) + ")"
+			if (*entry).IsNewer {
+				return StyleNewer.Render((*entry).Name) + " (" + (*entry).ModTime.Format(time.RFC3339) + ")"
+			}
+
+			if (*entry).IsOlder {
+				return StyleOlder.Render((*entry).Name) + " (" + (*entry).ModTime.Format(time.RFC3339) + ")"
+			}
+		} else {
+
+			if (*entry).IsNewer {
+				return StyleNewer.Render((*entry).Name)
+			}
+
+			if (*entry).IsOlder {
+				return StyleOlder.Render((*entry).Name)
+			}
 		}
 	}
 
 	if CRC32 {
-		if (*entry).IsDiff {
-			return StyleDiff.Render((*entry).Name) + " (" + (*entry).Checksum + ")"
+
+		if Info {
+
+			if (*entry).IsDiff {
+				return StyleDiff.Render((*entry).Name) + " (" + (*entry).Checksum + ")"
+			}
+		} else {
+
+			if (*entry).IsDiff {
+				return StyleDiff.Render((*entry).Name)
+			}
 		}
 	}
 

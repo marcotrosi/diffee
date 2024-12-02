@@ -25,6 +25,7 @@ var (
 	Size    bool
 	Time    bool
 	CRC32   bool
+	Info    bool
 	Swap    bool
 	Depth   int
 	NoColor bool
@@ -50,6 +51,7 @@ func main() {
 	flag.BoolVar(&Size   , "size"   , false, "compare file size"         )
 	flag.BoolVar(&Time   , "time"   , false, "compare modification time" )
 	flag.BoolVar(&CRC32  , "crc32"  , false, "compare CRC32 checksum"    )
+	flag.BoolVar(&Info   , "info"   , false, "print file diff info"      )
 	flag.BoolVar(&Swap   , "swap"   , false, "swap sides"                )
 	flag.IntVar(&Depth   , "depth"  , 0    , "limit depth, 0 is no limit")
 	flag.BoolVar(&NoColor, "nocolor", false, "turn colored output off"   )
