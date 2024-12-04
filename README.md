@@ -50,6 +50,10 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- Print information on differences (checksum, size, modtime).
 - 🟢 `--swap/-w`
 	- Swap sides.
+- 🟢 `--include <regex>`
+	- Include paths that match the regex pattern. Can be used multiple times.
+- 🟢 `--exclude <regex>`
+	- Exclude paths that match the regex pattern. If `--include` is used `--exclude` is applied on paths matching the _include regex_. Can be used multiple times.
 - 🟢 `--nocolor/-n`
 	- Print without colors.
 - 🟢 `--version/-v`
@@ -62,16 +66,12 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- Show only differences, hide same files.
 - 🔴 `--same`
 	- Show only same files, hide files with differences.
-- 🔴 `--include <regex>`
-	- Include paths that match the regex pattern.
-- 🔴 `--exclude <regex>`
-	- Exclude paths that match the regex pattern. If `--include` is used `--exclude` is applied on paths matching the _include regex_.
-- 🔴 `--ignore <regex>`
-	- Do not check for differences on paths that match the regex pattern.
 - 🔴 `--noorphans/-O`
 	- Do not show orphans.
 - 🔴 `--orphans/-o`
 	- Only show orphans.
+- 🔴 `--ignore <regex>`
+	- Do not check for differences on paths that match the regex pattern.
 
 
 ## Ideas
@@ -93,6 +93,8 @@ There is also the future idea to provide an interactive mode which brings it muc
 	- --filediffcmd="icdiff {} {}"  or env var
 - `-u/--unified`
 - `--respect-vcs-ignore`
+- second `--all` or `-A` to also not skip .git folders?
+- use better args parser
 
 Maybe the performance can be improved by using multi-threading?
 

@@ -5,9 +5,10 @@ import ( // <<<
 	"fmt"
 	"flag"
 	"path"
+	"regexp"
 ) // >>>
 
-// global variables and constants <<<
+// global variables, constants and types <<<
 const Tool_s    string = "diffdir"
 const Version_s string = "0.1.0"
 const (
@@ -17,6 +18,7 @@ const (
 	NOT_A_DIR
 	EXLUSIVE_OPTS
 )
+type RegExes []*regexp.Regexp
 var (
 	Version bool
 	Help    bool
@@ -29,7 +31,20 @@ var (
 	Swap    bool
 	Depth   int
 	NoColor bool
+	Exclude RegExes
+	Include RegExes
 )
+// >>>
+
+// local functions <<<
+func (n *RegExes) String() string {
+    return fmt.Sprintf("%s", *n)
+}
+
+func (n *RegExes) Set(value string) error {
+    *n = append(*n, regexp.MustCompile(value))
+    return nil
+}
 // >>>
 
 func main() {
@@ -44,17 +59,19 @@ func main() {
 	// >>>
 
 	// parse cli args <<<
-	flag.BoolVar(&Version, "version", false, "print version"             )
-	flag.BoolVar(&Help   , "help"   , false, "print help"                )
-	flag.BoolVar(&Flat   , "flat"   , false, "print differences flat"    )
-	flag.BoolVar(&All    , "all"    , false, "don't ignore dotfiles"     )
-	flag.BoolVar(&Size   , "size"   , false, "compare file size"         )
-	flag.BoolVar(&Time   , "time"   , false, "compare modification time" )
-	flag.BoolVar(&CRC32  , "crc32"  , false, "compare CRC32 checksum"    )
-	flag.BoolVar(&Info   , "info"   , false, "print file diff info"      )
-	flag.BoolVar(&Swap   , "swap"   , false, "swap sides"                )
-	flag.IntVar(&Depth   , "depth"  , 0    , "limit depth, 0 is no limit")
-	flag.BoolVar(&NoColor, "nocolor", false, "turn colored output off"   )
+	flag.BoolVar(&Version  , "version", false, "print version"                         )
+	flag.BoolVar(&Help     , "help"   , false, "print help"                            )
+	flag.BoolVar(&Flat     , "flat"   , false, "print differences flat"                )
+	flag.BoolVar(&All      , "all"    , false, "don't ignore dotfiles"                 )
+	flag.BoolVar(&Size     , "size"   , false, "compare file size"                     )
+	flag.BoolVar(&Time     , "time"   , false, "compare modification time"             )
+	flag.BoolVar(&CRC32    , "crc32"  , false, "compare CRC32 checksum"                )
+	flag.BoolVar(&Info     , "info"   , false, "print file diff info"                  )
+	flag.BoolVar(&Swap     , "swap"   , false, "swap sides"                            )
+	flag.IntVar(&Depth     , "depth"  , 0    , "limit depth, 0 is no limit"            )
+	flag.BoolVar(&NoColor  , "nocolor", false, "turn colored output off"               )
+	flag.Var(&Exclude      , "exclude",        "exclude matching paths from diff"      )
+	flag.Var(&Include      , "include",        "exclude non-matching paths from diff"  )
 	flag.Parse()
 	// >>>
 

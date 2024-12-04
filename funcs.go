@@ -116,9 +116,15 @@ func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) 
 
 		fpath = path.Clean(strings.Replace(fpath, Root, "", 1))
 
+		if Depth != 0 {
+			if strings.Count(fpath, string(os.PathSeparator)) >= Depth {
+				return filepath.SkipDir
+			}
+		}
+
 		if All == false {
-			NameChunk_s := NameRegEx.FindString(fpath)
-			if NameChunk_s[:1] == "." {
+			NameChunk := NameRegEx.FindString(fpath)
+			if NameChunk[:1] == "." {
 				if info.IsDir() {
 					return filepath.SkipDir
 				} else {
@@ -127,16 +133,46 @@ func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) 
 			}
 		}
 
-		if Depth != 0 {
-			if strings.Count(fpath, string(os.PathSeparator)) >= Depth {
-				return filepath.SkipDir
+		if info.IsDir() {
+			fpath = fpath + "/"
+		}
+
+		if len(Include) > 0 {
+			MatchFound := false
+			for in:=0 ; in < len(Include) ; in++ {
+				Match := Include[in].FindString(fpath)
+				if Match != "" {
+					MatchFound = true
+				}
+			}
+			if MatchFound == false {
+				return nil
 			}
 		}
 
-		if info.IsDir() {
-			*ListOfPaths = append(*ListOfPaths, fpath + "/")
-		} else {
+		if len(Exclude) > 0 {
+			for ex:=0 ; ex < len(Exclude) ; ex++ {
+				Match := Exclude[ex].FindString(fpath)
+				if Match != "" {
+					if info.IsDir() {
+						return filepath.SkipDir
+					} else {
+						return nil
+					}
+				}
+			}
+		}
+
+		if len(Include) == 0 {
 			*ListOfPaths = append(*ListOfPaths, fpath)
+		} else { // little optimization as it produces lots of data, this is currently/hopefully only needed when the --include option has been used
+					// it also relies on the fact that we sort-unique at the end
+			SplitPath := strings.SplitAfter(fpath, "/")
+			CombinedPath := ""
+			for i:=0; i < len(SplitPath); i++ {
+				CombinedPath = CombinedPath + SplitPath[i]
+				*ListOfPaths = append(*ListOfPaths, CombinedPath)
+			}
 		}
 
 		return nil
@@ -170,7 +206,7 @@ func getDirContents(leftroot string, rightroot string, unionset *[]string, leftc
 		NormPath  := (*unionset)[i]
 		IsDotfile := false
 
-		Name  := NameRegEx.FindString(NormPath)
+		Name := NameRegEx.FindString(NormPath)
 		if Name[:1] == "." {
 			IsDotfile = true
 		}
