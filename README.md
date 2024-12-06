@@ -62,16 +62,14 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- Print help.
 - 🟠 `--flat/-f`
 	- Print flat diff, without tree view.
+- 🟠 `--noorphans/-O`
+	- Do not show orphans.
+- 🟠 `--orphans/-o`
+	- Only show orphans.
 - 🔴 `--diff`
 	- Show only differences, hide same files.
 - 🔴 `--same`
 	- Show only same files, hide files with differences.
-- 🔴 `--noorphans/-O`
-	- Do not show orphans.
-- 🔴 `--orphans/-o`
-	- Only show orphans.
-- 🔴 `--ignore <regex>`
-	- Do not check for differences on paths that match the regex pattern.
 
 
 ## Ideas
@@ -95,6 +93,8 @@ There is also the future idea to provide an interactive mode which brings it muc
 - `--respect-vcs-ignore`
 - second `--all` or `-A` to also not skip .git folders?
 - use better args parser
+- `--ignore <regex>` Do not check for differences on paths that match the regex pattern. do I really need this?
+- auto-depth - to not descent into folders that don't have differences, to reduce print output
 
 Maybe the performance can be improved by using multi-threading?
 

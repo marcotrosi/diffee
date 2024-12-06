@@ -36,7 +36,7 @@ type Entry struct {// <<<
 var ( // <<<
 	NameRegEx *regexp.Regexp = regexp.MustCompile("[^/]+/?$")
 	StyleRoot    = lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
-	StyleMissing = lipgloss.NewStyle().Background(lipgloss.Color("4"))
+	StyleMissing = lipgloss.NewStyle().Foreground(lipgloss.Color("4"))
 	StyleOrphan  = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 	StyleBigger  = lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
 	StyleSmaller = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
@@ -297,7 +297,6 @@ func getDirContents(leftroot string, rightroot string, unionset *[]string, leftc
 			IsOlder   : LeftIsOlder,
 			IsDiff    : (LeftChecksum != RightChecksum),
 			Checksum  : LeftChecksum }
-		*leftcontent = append(*leftcontent, LeftEntry)
 
 		RightEntry := Entry{
 			Path      : NormPath,
@@ -314,6 +313,20 @@ func getDirContents(leftroot string, rightroot string, unionset *[]string, leftc
 			IsOlder   : RightIsOlder,
 			IsDiff    : (RightChecksum != LeftChecksum),
 			Checksum  : RightChecksum }
+
+		if Orphans {
+			if (!(LeftIsMissing || LeftIsOrphan) && (LeftIsDir == false)) { // TODO write better and fix path issue to avoid check for files
+				continue
+			}
+		}
+
+		if NoOrphans {
+			if (LeftIsMissing || LeftIsOrphan) { // TODO write better
+				continue
+			}
+		}
+
+		*leftcontent  = append(*leftcontent, LeftEntry)
 		*rightcontent = append(*rightcontent, RightEntry)
 	}
 
@@ -322,7 +335,7 @@ func getDirContents(leftroot string, rightroot string, unionset *[]string, leftc
 func decorateText(entry *Entry) string {// <<<
 
 	if (*entry).IsMissing {
-		return StyleMissing.Render(strings.Repeat(" ", len((*entry).Name)))
+		return StyleMissing.Render(strings.Repeat("░", len((*entry).Name)))
 	}
 
 	if (*entry).IsOrphan {

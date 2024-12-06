@@ -20,19 +20,21 @@ const (
 )
 type RegExes []*regexp.Regexp
 var (
-	Version bool
-	Help    bool
-	Flat    bool
-	All     bool
-	Size    bool
-	Time    bool
-	CRC32   bool
-	Info    bool
-	Swap    bool
-	Depth   int
-	NoColor bool
-	Exclude RegExes
-	Include RegExes
+	Version   bool
+	Help      bool
+	Flat      bool
+	All       bool
+	Size      bool
+	Time      bool
+	CRC32     bool
+	Info      bool
+	Swap      bool
+	Depth     int
+	NoColor   bool
+	Orphans   bool
+	NoOrphans bool
+	Exclude   RegExes
+	Include   RegExes
 )
 // >>>
 
@@ -59,19 +61,21 @@ func main() {
 	// >>>
 
 	// parse cli args <<<
-	flag.BoolVar(&Version  , "version", false, "print version"                         )
-	flag.BoolVar(&Help     , "help"   , false, "print help"                            )
-	flag.BoolVar(&Flat     , "flat"   , false, "print differences flat"                )
-	flag.BoolVar(&All      , "all"    , false, "don't ignore dotfiles"                 )
-	flag.BoolVar(&Size     , "size"   , false, "compare file size"                     )
-	flag.BoolVar(&Time     , "time"   , false, "compare modification time"             )
-	flag.BoolVar(&CRC32    , "crc32"  , false, "compare CRC32 checksum"                )
-	flag.BoolVar(&Info     , "info"   , false, "print file diff info"                  )
-	flag.BoolVar(&Swap     , "swap"   , false, "swap sides"                            )
-	flag.IntVar(&Depth     , "depth"  , 0    , "limit depth, 0 is no limit"            )
-	flag.BoolVar(&NoColor  , "nocolor", false, "turn colored output off"               )
-	flag.Var(&Exclude      , "exclude",        "exclude matching paths from diff"      )
-	flag.Var(&Include      , "include",        "exclude non-matching paths from diff"  )
+	flag.BoolVar(&Version  , "version"  , false, "print version"                         )
+	flag.BoolVar(&Help     , "help"     , false, "print help"                            )
+	flag.BoolVar(&Flat     , "flat"     , false, "print differences flat"                )
+	flag.BoolVar(&All      , "all"      , false, "don't ignore dotfiles"                 )
+	flag.BoolVar(&Size     , "size"     , false, "compare file size"                     )
+	flag.BoolVar(&Time     , "time"     , false, "compare modification time"             )
+	flag.BoolVar(&CRC32    , "crc32"    , false, "compare CRC32 checksum"                )
+	flag.BoolVar(&Info     , "info"     , false, "print file diff info"                  )
+	flag.BoolVar(&Swap     , "swap"     , false, "swap sides"                            )
+	flag.IntVar(&Depth     , "depth"    , 0    , "limit depth, 0 is no limit"            )
+	flag.BoolVar(&NoColor  , "nocolor"  , false, "turn colored output off"               )
+	flag.BoolVar(&Orphans  , "orphans"  , false, "show only orphans"                     )
+	flag.BoolVar(&NoOrphans, "noorphans", false, "do not show orphans"                   )
+	flag.Var(&Exclude      , "exclude"  ,        "exclude matching paths from diff"      )
+	flag.Var(&Include      , "include"  ,        "exclude non-matching paths from diff"  )
 	flag.Parse()
 	// >>>
 
@@ -92,6 +96,11 @@ func main() {
 	}
 	if XORCnt > 1 {
 		printError("-size, -time and -crc32 are mutual exclusive, use only one")
+		os.Exit(EXLUSIVE_OPTS)
+	}
+
+	if Orphans && NoOrphans {
+		printError("-orphans and -noorphans can not be used together, use only one")
 		os.Exit(EXLUSIVE_OPTS)
 	}
 	// >>>
