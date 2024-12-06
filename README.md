@@ -66,9 +66,9 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- Do not show orphans.
 - 🟠 `--orphans/-o`
 	- Only show orphans.
-- 🔴 `--diff`
+- 🟠 `--diff`
 	- Show only differences, hide same files.
-- 🔴 `--same`
+- 🟠 `--same`
 	- Show only same files, hide files with differences.
 
 

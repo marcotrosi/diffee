@@ -33,6 +33,8 @@ var (
 	NoColor   bool
 	Orphans   bool
 	NoOrphans bool
+	Diff      bool
+	Same      bool
 	Exclude   RegExes
 	Include   RegExes
 )
@@ -74,6 +76,8 @@ func main() {
 	flag.BoolVar(&NoColor  , "nocolor"  , false, "turn colored output off"               )
 	flag.BoolVar(&Orphans  , "orphans"  , false, "show only orphans"                     )
 	flag.BoolVar(&NoOrphans, "noorphans", false, "do not show orphans"                   )
+	flag.BoolVar(&Diff     , "diff"     , false, "show only files that differ"           )
+	flag.BoolVar(&Same     , "same"     , false, "show only files that are the same"     )
 	flag.Var(&Exclude      , "exclude"  ,        "exclude matching paths from diff"      )
 	flag.Var(&Include      , "include"  ,        "exclude non-matching paths from diff"  )
 	flag.Parse()

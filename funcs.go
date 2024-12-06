@@ -326,6 +326,14 @@ func getDirContents(leftroot string, rightroot string, unionset *[]string, leftc
 			}
 		}
 
+		if Diff && (LeftEntry.IsDir == false) && (RightChecksum == LeftChecksum) { // TODO write better
+			continue
+		} 
+
+		if Same && (LeftEntry.IsDir == false) && (RightChecksum != LeftChecksum) { // TODO write better
+			continue
+		}
+
 		*leftcontent  = append(*leftcontent, LeftEntry)
 		*rightcontent = append(*rightcontent, RightEntry)
 	}
