@@ -163,17 +163,24 @@ func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) 
 			}
 		}
 
-		if len(Include) == 0 {
-			*ListOfPaths = append(*ListOfPaths, fpath)
-		} else { // little optimization as it produces lots of data, this is currently/hopefully only needed when the --include option has been used
-					// it also relies on the fact that we sort-unique at the end
+		if Files {
+			if info.IsDir() {
+				return nil
+			}
+		}
+
+		if Files || (len(Include) > 0) {
+			// TODO maybe find another way as it produces lots of data, it also relies on the fact that we sort-unique at the end
 			SplitPath := strings.SplitAfter(fpath, "/")
 			CombinedPath := ""
 			for i:=0; i < len(SplitPath); i++ {
 				CombinedPath = CombinedPath + SplitPath[i]
 				*ListOfPaths = append(*ListOfPaths, CombinedPath)
 			}
+			return nil
 		}
+
+		*ListOfPaths = append(*ListOfPaths, fpath)
 
 		return nil
 	}

@@ -33,6 +33,7 @@ var (
 	NoColor   bool
 	Orphans   bool
 	NoOrphans bool
+	Files     bool
 	Diff      bool
 	Same      bool
 	Exclude   RegExes
@@ -63,23 +64,24 @@ func main() {
 	// >>>
 
 	// parse cli args <<<
-	flag.BoolVar(&Version  , "version"  , false, "print version"                         )
-	flag.BoolVar(&Help     , "help"     , false, "print help"                            )
-	flag.BoolVar(&Flat     , "flat"     , false, "print differences flat"                )
-	flag.BoolVar(&All      , "all"      , false, "don't ignore dotfiles"                 )
-	flag.BoolVar(&Size     , "size"     , false, "compare file size"                     )
-	flag.BoolVar(&Time     , "time"     , false, "compare modification time"             )
-	flag.BoolVar(&CRC32    , "crc32"    , false, "compare CRC32 checksum"                )
-	flag.BoolVar(&Info     , "info"     , false, "print file diff info"                  )
-	flag.BoolVar(&Swap     , "swap"     , false, "swap sides"                            )
-	flag.IntVar(&Depth     , "depth"    , 0    , "limit depth, 0 is no limit"            )
-	flag.BoolVar(&NoColor  , "nocolor"  , false, "turn colored output off"               )
-	flag.BoolVar(&Orphans  , "orphans"  , false, "show only orphans"                     )
-	flag.BoolVar(&NoOrphans, "noorphans", false, "do not show orphans"                   )
-	flag.BoolVar(&Diff     , "diff"     , false, "show only files that differ"           )
-	flag.BoolVar(&Same     , "same"     , false, "show only files that are the same"     )
-	flag.Var(&Exclude      , "exclude"  ,        "exclude matching paths from diff"      )
-	flag.Var(&Include      , "include"  ,        "exclude non-matching paths from diff"  )
+	flag.BoolVar(&Version  , "version"   , false, "print version"                         )
+	flag.BoolVar(&Help     , "help"      , false, "print help"                            )
+	flag.BoolVar(&Flat     , "flat"      , false, "print differences flat"                )
+	flag.BoolVar(&All      , "all"       , false, "don't ignore dotfiles"                 )
+	flag.BoolVar(&Size     , "size"      , false, "compare file size"                     )
+	flag.BoolVar(&Time     , "time"      , false, "compare modification time"             )
+	flag.BoolVar(&CRC32    , "crc32"     , false, "compare CRC32 checksum"                )
+	flag.BoolVar(&Info     , "info"      , false, "print file diff info"                  )
+	flag.BoolVar(&Swap     , "swap"      , false, "swap sides"                            )
+	flag.IntVar(&Depth     , "depth"     , 0    , "limit depth, 0 is no limit"            )
+	flag.BoolVar(&NoColor  , "no-color"  , false, "turn colored output off"               )
+	flag.BoolVar(&Orphans  , "orphans"   , false, "show only orphans"                     )
+	flag.BoolVar(&NoOrphans, "no-orphans", false, "do not show orphans"                   )
+	flag.BoolVar(&Files    , "files"     , false, "show only files, no empty dirs"        )
+	flag.BoolVar(&Diff     , "diff"      , false, "show only files that differ"           )
+	flag.BoolVar(&Same     , "same"      , false, "show only files that are the same"     )
+	flag.Var(&Exclude      , "exclude"   ,        "exclude matching paths from diff"      )
+	flag.Var(&Include      , "include"   ,        "exclude non-matching paths from diff"  )
 	flag.Parse()
 	// >>>
 

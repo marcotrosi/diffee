@@ -54,7 +54,9 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- Include paths that match the regex pattern. Can be used multiple times.
 - 🟢 `--exclude <regex>`
 	- Exclude paths that match the regex pattern. If `--include` is used `--exclude` is applied on paths matching the _include regex_. Can be used multiple times.
-- 🟢 `--nocolor/-n`
+- 🟢 `--files`
+	- Only show files, don't care about empty dirs.
+- 🟢 `--no-color/-n`
 	- Print without colors.
 - 🟢 `--version/-v`
 	- Print version.
@@ -62,7 +64,7 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- Print help.
 - 🟠 `--flat/-f`
 	- Print flat diff, without tree view.
-- 🟠 `--noorphans/-O`
+- 🟠 `--no-orphans/-O`
 	- Do not show orphans.
 - 🟠 `--orphans/-o`
 	- Only show orphans.
