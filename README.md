@@ -1,6 +1,6 @@
-# DiffDir
+# diffee
 
-`diffdir` is a commandline folder comparison tool that offers a variety of outputs.
+`diffee` is a commandline folder comparison tool that offers a variety of outputs.
 
 
 ## Background
@@ -14,7 +14,7 @@ with tools like
 [`Beyond Compare`](https://www.scootersoftware.com),
 [`icdiff`](https://github.com/jeffkaufman/icdiff),
 [`diff -y`](https://www.gnu.org/software/diffutils/) and
-[`tree`](https://github.com/Old-Man-Programmer/tree) in mind.
+[`tree`](https://github.com/Old-Man-Programmer/tree) in mind, hence the name `diffee`.
 
 
 ## Disclaimer
@@ -25,13 +25,13 @@ instead of _C_ is because I wanted to use the _charmbracelet_ libs for colored o
 
 ## Overview
 
-By default `diffdir` does a static side-by-side comparison with a colored tree view. But it also offers a flat view
+By default `diffee` does a static side-by-side comparison with a colored tree view. But it also offers a flat view
 (`-flat`) which is useful to pipe the text into the next command.
 
 
 ## Usage
 
-    diffdir [options] [left_dir] right_dir
+    diffee [options] [left_dir] right_dir
 
 Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working directory is used as `left_dir`.
 

@@ -1,4 +1,4 @@
-module diffdir
+module diffee
 
 go 1.23.3
 

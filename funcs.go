@@ -46,11 +46,48 @@ var ( // <<<
 ) // >>>
 
 func printHelp() {// <<<
-	fmt.Println(" Usage of diffdir:")
-	fmt.Println("-help")
-	fmt.Println("  	print help")
-	fmt.Println("-version")
-	fmt.Println("  	print version")
+	var HelpText []string = []string {
+		"Usage of diffee:",
+		"  -all",
+		"      don't ignore dotfiles",
+		"  -crc32",
+		"      compare CRC32 checksum",
+		"  -depth int",
+		"      limit depth, 0 is no limit",
+		"  -diff",
+		"      show only files that differ",
+		"  -exclude value",
+		"      exclude matching paths from diff",
+		"  -files",
+		"      show only files, no empty dirs",
+		"  -flat",
+		"      print differences flat",
+		"  -help",
+		"      print help",
+		"  -include value",
+		"      exclude non-matching paths from diff",
+		"  -info",
+		"      print file diff info",
+		"  -no-color",
+		"      turn colored output off",
+		"  -no-orphans",
+		"      do not show orphans",
+		"  -orphans",
+		"      show only orphans",
+		"  -same",
+		"      show only files that are the same",
+		"  -size",
+		"      compare file size",
+		"  -swap",
+		"      swap sides",
+		"  -time",
+		"      compare modification time",
+		"  -version",
+		"      print version" }
+
+	for i := range(HelpText) {
+		fmt.Println(HelpText[i])
+	}
 }// >>>
 
 func printError(msg string) {// <<<
