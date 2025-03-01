@@ -80,7 +80,7 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 - use maps or sets to avoid the sort-unique step and therefore lots of data DONE
 - do not delete anything from the Entry slice
 - instead figure out how to use the Hide() function
-- combine left and right into a single Entry struct
+- combine left and right into a single Entry struct DONE
 - default diff detection by size followed by checksum if size is same
 - combine diff states and use enums
 

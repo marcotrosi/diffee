@@ -20,25 +20,25 @@ const (
 )
 type RegExes []*regexp.Regexp
 var (
-	Version   bool
-	Help      bool
-	Flat      bool
-	All       bool
-	Size      bool
-	Time      bool
-	CRC32     bool
-	Info      bool
-	Swap      bool
-	Depth     int
-	NoColor   bool
-	Orphans   bool
-	NoOrphans bool
-	Files     bool
-	Diff      bool
-	Same      bool
-	Exclude   RegExes
-	Include   RegExes
-	Test      bool
+	Arg_Version   bool
+	Arg_Help      bool
+	Arg_Flat      bool
+	Arg_All       bool
+	Arg_Size      bool
+	Arg_Time      bool
+	Arg_CRC32     bool
+	Arg_Info      bool
+	Arg_Swap      bool
+	Arg_Depth     int
+	Arg_NoColor   bool
+	Arg_Orphans   bool
+	Arg_NoOrphans bool
+	Arg_Files     bool
+	Arg_Diff      bool
+	Arg_Same      bool
+	Arg_Exclude   RegExes
+	Arg_Include   RegExes
+	Arg_Test      bool
 )
 // >>>
 
@@ -60,30 +60,29 @@ func main() {
 	var Right string
 	var XORCnt int = 0
 	var UnionSetOfDirContents []string
-	var LeftDirContents  []Entry
-	var RightDirContents []Entry
+	var DirContents []Entry
 	// >>>
 
 	// parse cli args <<<
-	flag.BoolVar(&Version  , "version"   , false, "print version"                         )
-	flag.BoolVar(&Help     , "help"      , false, "print help"                            )
-	flag.BoolVar(&Flat     , "flat"      , false, "print differences flat"                )
-	flag.BoolVar(&All      , "all"       , false, "don't ignore dotfiles"                 )
-	flag.BoolVar(&Size     , "size"      , false, "compare file size"                     )
-	flag.BoolVar(&Time     , "time"      , false, "compare modification time"             )
-	flag.BoolVar(&CRC32    , "crc32"     , false, "compare CRC32 checksum"                )
-	flag.BoolVar(&Info     , "info"      , false, "print file diff info"                  )
-	flag.BoolVar(&Swap     , "swap"      , false, "swap sides"                            )
-	flag.IntVar(&Depth     , "depth"     , 0    , "limit depth, 0 is no limit"            )
-	flag.BoolVar(&NoColor  , "no-color"  , false, "turn colored output off"               )
-	flag.BoolVar(&Orphans  , "orphans"   , false, "show only orphans"                     )
-	flag.BoolVar(&NoOrphans, "no-orphans", false, "do not show orphans"                   )
-	flag.BoolVar(&Files    , "files"     , false, "show only files, no empty dirs"        )
-	flag.BoolVar(&Diff     , "diff"      , false, "show only files that differ"           )
-	flag.BoolVar(&Same     , "same"      , false, "show only files that are the same"     )
-	flag.Var(&Exclude      , "exclude"   ,        "exclude matching paths from diff"      )
-	flag.Var(&Include      , "include"   ,        "exclude non-matching paths from diff"  )
-	flag.BoolVar(&Test     , "test"      , false, "testing Hide function"                 )
+	flag.BoolVar(&Arg_Version  , "version"   , false, "print version"                         )
+	flag.BoolVar(&Arg_Help     , "help"      , false, "print help"                            )
+	flag.BoolVar(&Arg_Flat     , "flat"      , false, "print differences flat"                )
+	flag.BoolVar(&Arg_All      , "all"       , false, "don't ignore dotfiles"                 )
+	flag.BoolVar(&Arg_Size     , "size"      , false, "compare file size"                     )
+	flag.BoolVar(&Arg_Time     , "time"      , false, "compare modification time"             )
+	flag.BoolVar(&Arg_CRC32    , "crc32"     , false, "compare CRC32 checksum"                )
+	flag.BoolVar(&Arg_Info     , "info"      , false, "print file diff info"                  )
+	flag.BoolVar(&Arg_Swap     , "swap"      , false, "swap sides"                            )
+	flag.IntVar (&Arg_Depth    , "depth"     , 0    , "limit depth, 0 is no limit"            )
+	flag.BoolVar(&Arg_NoColor  , "no-color"  , false, "turn colored output off"               )
+	flag.BoolVar(&Arg_Orphans  , "orphans"   , false, "show only orphans"                     )
+	flag.BoolVar(&Arg_NoOrphans, "no-orphans", false, "do not show orphans"                   )
+	flag.BoolVar(&Arg_Files    , "files"     , false, "show only files, no empty dirs"        )
+	flag.BoolVar(&Arg_Diff     , "diff"      , false, "show only files that differ"           )
+	flag.BoolVar(&Arg_Same     , "same"      , false, "show only files that are the same"     )
+	flag.Var    (&Arg_Exclude  , "exclude"   ,        "exclude matching paths from diff"      )
+	flag.Var    (&Arg_Include  , "include"   ,        "exclude non-matching paths from diff"  )
+	flag.BoolVar(&Arg_Test     , "test"      , false, "testing Hide function"                 )
 	flag.Parse()
 	// >>>
 
@@ -93,18 +92,18 @@ func main() {
 		os.Exit(TOO_MANY_ARGS)
 	}
 
-	if Test {
+	if Arg_Test {
 		Testing()
 		os.Exit(OK)
 	}
 
-	if Size {
+	if Arg_Size {
 		XORCnt += 1
 	}
-	if Time {
+	if Arg_Time {
 		XORCnt += 1
 	}
-	if CRC32 {
+	if Arg_CRC32 {
 		XORCnt += 1
 	}
 	if XORCnt > 1 {
@@ -112,28 +111,28 @@ func main() {
 		os.Exit(EXLUSIVE_OPTS)
 	}
 
-	if Orphans && NoOrphans {
+	if Arg_Orphans && Arg_NoOrphans {
 		printError("-orphans and -noorphans can not be used together, use only one")
 		os.Exit(EXLUSIVE_OPTS)
 	}
 	// >>>
 
 	// print help <<<
-	if flag.NArg() == 0 || Help {
+	if flag.NArg() == 0 || Arg_Help {
 		printHelp()
 		os.Exit(OK)
 	}
 	// >>>
 
 	// print version <<<
-	if Version {
+	if Arg_Version {
 		fmt.Println(Version_s)
 		os.Exit(OK)
 	}
 	// >>>
 
 	// no color <<<
-	if NoColor {
+	if Arg_NoColor {
 		setNoColor()
 	}
 	// >>>
@@ -162,23 +161,24 @@ func main() {
 
 	// get dir contents <<<
 	getUnionSetOfDirContents(Left, Right, &UnionSetOfDirContents)
-	getDirContents(Left, Right, &UnionSetOfDirContents, &LeftDirContents, &RightDirContents)
+	getDirContents(Left, Right, &UnionSetOfDirContents, &DirContents)
 	// >>>
 
-	// print flat comparison
-	if Flat {
-		printFlat(&LeftDirContents, &RightDirContents)
+	// print flat comparison <<<
+	if Arg_Flat {
+		printFlat(&DirContents)
 		os.Exit(OK)
-	}
+	}// >>>
 	
-	// start interactive comparison
+	// start interactive comparison <<<
 	// if Interactive {
-		// runInteractive(&LeftDirContents, &RightDirContents)
+		// runInteractive(&DirContents)
 		// os.Exit(OK)
-	// }
+	// } // >>>
 
-	// print side by side comparison
-	printSideBySide(&LeftDirContents, &RightDirContents)
+	// print side by side comparison <<<
+	printSideBySide(&DirContents)
 	os.Exit(OK)
+	// >>>
 }
 
