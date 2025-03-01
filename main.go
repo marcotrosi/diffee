@@ -38,6 +38,7 @@ var (
 	Same      bool
 	Exclude   RegExes
 	Include   RegExes
+	Test      bool
 )
 // >>>
 
@@ -82,6 +83,7 @@ func main() {
 	flag.BoolVar(&Same     , "same"      , false, "show only files that are the same"     )
 	flag.Var(&Exclude      , "exclude"   ,        "exclude matching paths from diff"      )
 	flag.Var(&Include      , "include"   ,        "exclude non-matching paths from diff"  )
+	flag.BoolVar(&Test     , "test"      , false, "testing Hide function"                 )
 	flag.Parse()
 	// >>>
 
@@ -89,6 +91,11 @@ func main() {
 	if flag.NArg() > 2 {
 		printError("too many args")
 		os.Exit(TOO_MANY_ARGS)
+	}
+
+	if Test {
+		Testing()
+		os.Exit(OK)
 	}
 
 	if Size {
@@ -143,12 +150,12 @@ func main() {
 
 	// check if dirs exists <<<
 	if isDirectory(Left) == false {
-		printError("left not a directory")
+		printError("left is not a directory")
 		os.Exit(NOT_A_DIR)
 	}
 
 	if isDirectory(Right) == false {
-		printError("right not a directory")
+		printError("right is not a directory")
 		os.Exit(NOT_A_DIR)
 	}
 	// >>>
@@ -174,3 +181,4 @@ func main() {
 	printSideBySide(&LeftDirContents, &RightDirContents)
 	os.Exit(OK)
 }
+

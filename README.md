@@ -9,7 +9,7 @@ I'm very much used to `Beyond Compare 4` at work, but they didn't provide a prop
 something for the commandline. In the meantime `Beyond Compare 5` was released. I wasn't able to find a commandline tool
 in my package manager to diff directories in a similar fashion. Then I searched on Github and there are many repos with
 names like `cmpdir`, `dircmp` or any other combination with the words `[cmp|diff]+[dir(s)|folder(s)|tree(s)]`, but none
-of them provides screenshots or a good description, so I assume they are not doing what I need. So I created this tool
+of them provides screenshots or a good description, so I assume they are not doing what I need. Therefore I created this tool
 with tools like
 [`Beyond Compare`](https://www.scootersoftware.com),
 [`icdiff`](https://github.com/jeffkaufman/icdiff),
@@ -76,6 +76,16 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 
 ## Ideas
 
+### New strategy
+- use maps or sets to avoid the sort-unique step and therefore lots of data DONE
+- do not delete anything from the Entry slice
+- instead figure out how to use the Hide() function
+- combine left and right into a single Entry struct
+- default diff detection by size followed by checksum if size is same
+- combine diff states and use enums
+
+### Others
+
 There is also the future idea to provide an interactive mode which brings it much closer to `Beyond Compare`.
 
 - `--interactive/-i`
@@ -94,7 +104,7 @@ There is also the future idea to provide an interactive mode which brings it muc
 - `-u/--unified`
 - `--respect-vcs-ignore`
 - second `--all` or `-A` to also not skip .git folders?
-- use better args parser
+- use better args parser ? https://pkg.go.dev/github.com/akamensky/argparse
 - `--ignore <regex>` Do not check for differences on paths that match the regex pattern. do I really need this?
 - auto-depth - to not descent into folders that don't have differences, to reduce print output
 

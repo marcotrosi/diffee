@@ -12,8 +12,10 @@ import ( // <<<
 	"strings"
 	"strconv"
 	"github.com/codingsince1985/checksum"
-	"github.com/charmbracelet/lipgloss/v2/tree"
+	// "github.com/charmbracelet/lipgloss/v2/tree"
+	// "github.com/charmbracelet/lipgloss/v2"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/tree"
 ) // >>>
 
 type Entry struct {// <<<
@@ -117,7 +119,7 @@ func isDirectory(dirpath string) bool {// <<<
 	return fileInfo.IsDir()
 }// >>>
 
-func removeDuplicates(sortedSlice *[]string) {// <<<
+func removeDuplicates(sortedSlice *[]string) {// TODO delete <<<
 
 	if len(*sortedSlice) == 0 {
 		return
@@ -140,6 +142,7 @@ func removeDuplicates(sortedSlice *[]string) {// <<<
 func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) {// <<<
 
 	var Root string
+	var SetOfPaths = make(map[string]struct{})
 
 	WalkerFunc := func(fpath string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -147,7 +150,7 @@ func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) 
 		}
 
 		if fpath == Root {
-			*ListOfPaths = append(*ListOfPaths, ".")
+			SetOfPaths["."] = struct{}{}
 			return nil
 		}
 
@@ -207,17 +210,16 @@ func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) 
 		}
 
 		if Files || (len(Include) > 0) {
-			// TODO maybe find another way as it produces lots of data, it also relies on the fact that we sort-unique at the end
 			SplitPath := strings.SplitAfter(fpath, "/")
 			CombinedPath := ""
 			for i:=0; i < len(SplitPath); i++ {
 				CombinedPath = CombinedPath + SplitPath[i]
-				*ListOfPaths = append(*ListOfPaths, CombinedPath)
+				SetOfPaths[CombinedPath] = struct{}{}
 			}
 			return nil
 		}
 
-		*ListOfPaths = append(*ListOfPaths, fpath)
+		SetOfPaths[fpath] = struct{}{}
 
 		return nil
 	}
@@ -233,8 +235,10 @@ func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) 
 		fmt.Println(err)
 	}
 
+	for p := range SetOfPaths {
+		*ListOfPaths = append(*ListOfPaths, p)
+	}
 	sort.Strings(*ListOfPaths)
-	removeDuplicates(ListOfPaths)
 
 }// >>>
 
@@ -524,3 +528,11 @@ func printFlat(left *[]Entry, right *[]Entry) {// <<<
 		fmt.Printf("%q %q\n", leftroot+(*left)[i].Path, rightroot+(*right)[i].Path)
 	}
 }// >>>
+
+func Testing() {
+	var T *tree.Tree = tree.Root("root")
+	T.Child("first")
+	T.Child("second")
+	T.Child(tree.NewLeaf("third", false))
+	fmt.Println(T)
+}
