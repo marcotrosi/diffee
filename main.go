@@ -115,6 +115,11 @@ func main() {
 		printError("-orphans and -noorphans can not be used together, use only one")
 		os.Exit(EXLUSIVE_OPTS)
 	}
+
+	if Arg_Diff && Arg_Same {
+		printError("-diff and -same can not be used together, use only one")
+		os.Exit(EXLUSIVE_OPTS)
+	}
 	// >>>
 
 	// print help <<<
@@ -180,5 +185,6 @@ func main() {
 	printSideBySide(&DirContents)
 	os.Exit(OK)
 	// >>>
+
 }
 

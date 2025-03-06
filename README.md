@@ -78,11 +78,13 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 
 ### New strategy
 - use maps or sets to avoid the sort-unique step and therefore lots of data DONE
-- do not delete anything from the Entry slice
-- instead figure out how to use the Hide() function
+- do not delete anything from the Entry slice DONE
+- instead figure out how to use the Hide() function DONE wrote my own tree
 - combine left and right into a single Entry struct DONE
 - default diff detection by size followed by checksum if size is same
 - combine diff states and use enums
+- use no color hint given at Github
+- should I replace the booleans with bits?
 
 ### Others
 

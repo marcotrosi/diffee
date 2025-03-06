@@ -13,7 +13,7 @@ import ( // <<<
 	"strconv"
 	"github.com/codingsince1985/checksum"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/tree"
+	"diffee/tree"
 ) // >>>
 
 type Entry struct {// <<<
@@ -333,51 +333,22 @@ func getDirContents(leftroot string, rightroot string, unionset *[]string, conte
 		}
 
 		NewEntry := Entry{
-			NormPath       : NormPath,
-			Name           : Name,
-			IsDir          : IsDir,
-			IsDotfile      : IsDotfile,
-			IsDiff         : (LeftChecksum != RightChecksum),
+			NormPath  : NormPath,
+			Name      : Name,
+			IsDir     : IsDir,
+			IsDotfile : IsDotfile,
+			IsDiff    : (LeftChecksum != RightChecksum),
                         
-			Path: map[string]string{ "left":  LeftPath, "right": RightPath },
-
-			Size: map[string]int64{ "left":  LeftSize, "right": RightSize },
-
-			ModTime: map[string]time.Time{ "left":  LeftModTime, "right": RightModTime },
-
-			Checksum: map[string]string{ "left":  LeftChecksum, "right": RightChecksum },
-
-			IsMissing: map[string]bool{ "left":  LeftIsMissing, "right": RightIsMissing },
-
-			IsOrphan: map[string]bool{ "left":  LeftIsOrphan, "right": RightIsOrphan },
-
-			IsBigger: map[string]bool{ "left":  LeftIsBigger, "right": RightIsBigger },
-
-			IsSmaller: map[string]bool{ "left":  LeftIsSmaller, "right": RightIsSmaller },
-
-			IsNewer: map[string]bool{ "left":  LeftIsNewer, "right": RightIsNewer },
-
-			IsOlder: map[string]bool{ "left":  LeftIsOlder, "right": RightIsOlder }}
-
-		// if Arg_Orphans {
-		// 	if (!(LeftIsMissing || LeftIsOrphan) && (LeftIsDir == false)) { // TODO write better and fix path issue to avoid check for files
-		// 		continue
-		// 	}
-		// }
-      //
-		// if Arg_NoOrphans {
-		// 	if (LeftIsMissing || LeftIsOrphan) { // TODO write better
-		// 		continue
-		// 	}
-		// }
-      //
-		// if Arg_Diff && (LeftEntry.IsDir == false) && (RightChecksum == LeftChecksum) { // TODO write better
-		// 	continue
-		// } 
-      //
-		// if Arg_Same && (LeftEntry.IsDir == false) && (RightChecksum != LeftChecksum) { // TODO write better
-		// 	continue
-		// }
+			Path     : map[string]string   { "left": LeftPath     , "right": RightPath      },
+			Size     : map[string]int64    { "left": LeftSize     , "right": RightSize      },
+			ModTime  : map[string]time.Time{ "left": LeftModTime  , "right": RightModTime   },
+			Checksum : map[string]string   { "left": LeftChecksum , "right": RightChecksum  },
+			IsMissing: map[string]bool     { "left": LeftIsMissing, "right": RightIsMissing },
+			IsOrphan : map[string]bool     { "left": LeftIsOrphan , "right": RightIsOrphan  },
+			IsBigger : map[string]bool     { "left": LeftIsBigger , "right": RightIsBigger  },
+			IsSmaller: map[string]bool     { "left": LeftIsSmaller, "right": RightIsSmaller },
+			IsNewer  : map[string]bool     { "left": LeftIsNewer  , "right": RightIsNewer   },
+			IsOlder  : map[string]bool     { "left": LeftIsOlder  , "right": RightIsOlder   }}
 
 		*content  = append(*content, NewEntry)
 	}
@@ -460,41 +431,76 @@ func decorateText(entry *Entry, side string) string {// <<<
 
 func convertSliceToTree(content *[]Entry, side string) *tree.Tree {// <<<
 
-	var Result *tree.Tree = tree.Root(StyleRoot.Render((*content)[0].Path[side]))
-	var Stack []*tree.Tree
-	var LastDepth    int = 0
-	var CurrentDepth int = 0
+	var Result = tree.NewTree(StyleRoot.Render((*content)[0].Path[side]))
+	var Stack []*tree.Node
+	var LastDepth     int = 0
+	var CurrentDepth  int = 0
 	var DecoratedText string
+	var HideEntry     bool= false
+	var HideFile      bool= false
+	var HideDir       bool= false
 
-	Stack = append(Stack, Result)
+	Stack = append(Stack, &(Result.Node))
 
 	for i := 1; i < len(*content); i++ {
 
+		HideFile  = false
+		HideEntry = false
+
 		Entry := (*content)[i]
 
-		CurrentDepth = strings.Count(Entry.NormPath, "/")
+		CurrentDepth = strings.Count(Entry.NormPath, "/") // count slashes to determine current tree depth
 		if Entry.IsDir {
 			CurrentDepth = CurrentDepth - 1
 		}
 
-		if CurrentDepth > LastDepth {
-			LastChildren := Stack[LastDepth].Children()
-			Stack = append(Stack, LastChildren.At(LastChildren.Length()-1).(*tree.Tree))
+		if CurrentDepth > LastDepth { // push new child onto stack
+			Stack = append(Stack, Stack[LastDepth].GetChild(-1))
 			LastDepth = CurrentDepth
-		} else if CurrentDepth < LastDepth {
+		} else if CurrentDepth < LastDepth { // pop from stack as many as we go directories upwards
 			Stack = Stack[:len(Stack)-(LastDepth-CurrentDepth)]
 			LastDepth = CurrentDepth
+			HideDir = false
+		} else {
+			if Entry.IsDir {
+				HideDir = false
+			}
 		}
 
 		DecoratedText = decorateText(&Entry, side)
 
-		if Entry.IsDir {
-			Stack[LastDepth].Child(tree.Root(DecoratedText))
-		} else {
-			Stack[LastDepth].Child(DecoratedText)
-		}
+		// // show only orphans
+		// if Arg_Orphans && (!Entry.IsOrphan["left"] && !Entry.IsOrphan["right"]) {
+		// 	if Entry.IsDir {
+		// 		HideDir = true
+		// 	} else {
+		// 		HideFile = true
+		// 	}
+		// } 
+      //
+		// // show only none-orphans
+		// if Arg_NoOrphans && ((Entry.IsOrphan["left"]) || (Entry.IsOrphan["right"])) {
+		// 	if Entry.IsDir {
+		// 		HideDir = true
+		// 	} else {
+		// 		HideFile = true
+		// 	}
+		// } 
+      //
+		// // show only files with differences
+		// if Arg_Diff && (Entry.IsDir == false) && (Entry.Checksum["left"] == Entry.Checksum["right"]) {
+		// 	HideFile = true
+		// } 
+      //
+		// // show only files that are same
+		// if Arg_Same && (Entry.IsDir == false) && (Entry.Checksum["left"] != Entry.Checksum["right"]) {
+		// 	HideFile = true
+		// } 
 
+		HideEntry = HideFile || HideDir
+		Stack[LastDepth].AddChild(DecoratedText).HideNode(HideEntry)
 	}
+
 	return Result
 }// >>>
 
@@ -502,18 +508,13 @@ func printSideBySide(contents *[]Entry) {// <<<
 
 	var LeftTree  = convertSliceToTree(contents, "left")
 	var RightTree = convertSliceToTree(contents, "right")
-	var Whitespace string = strings.Repeat(" ", 10)
-	var Offset []string
 	var Output string
-	for range *contents {
-		Offset = append(Offset, Whitespace)
-	}
 
 	if Arg_Swap {
-		Output = lipgloss.JoinHorizontal(lipgloss.Top, RightTree.String(), strings.Join(Offset[:], "\n"), LeftTree.String())
-	} else {
-		Output = lipgloss.JoinHorizontal(lipgloss.Top, LeftTree.String(), strings.Join(Offset[:], "\n"), RightTree.String())
+		LeftTree, RightTree = RightTree, LeftTree
 	}
+
+	Output = lipgloss.JoinHorizontal(lipgloss.Top, strings.Join(LeftTree.RenderTree(), "\n"), strings.Join(RightTree.SetRenderOffset(10).RenderTree(), "\n"))
 	fmt.Println(Output)
 }// >>>
 
@@ -526,9 +527,40 @@ func printFlat(contents *[]Entry) {// <<<
 }// >>>
 
 func Testing() {// <<<
-	var T *tree.Tree = tree.Root("root")
-	T.Child("first")
-	T.Child("second")
-	T.Child(tree.NewLeaf("third", false))
-	fmt.Println(T)
+
+	var T = tree.NewTree("tree")
+
+	T.AddChild("first child").
+		AddChild("grandkid").
+		AddSibling("grandkid").
+		AddSibling("grandkid").HideNode(true)
+
+	T.AddChild("second child").
+		AddChild("grandkid").
+		AddSibling("grandkid").
+		AddSibling("grandkid").
+	GetParent().HideChildren(true)
+
+	T.AddChild("third child").
+		AddChild("grandkid").
+		AddSibling("grandkid").HideNode(true).
+		AddSibling("grandkid").
+		AddChild("grandgrandkid").
+		AddSibling("grandgrandkid")
+
+	println()
+	T.SetRenderStyle(tree.RenderTabsStyle)
+	println(T.RenderTree())
+
+	println()
+	T.SetRenderStyle(tree.RenderNumberedStyle)
+	println(T.RenderTree())
+
+	println()
+	T.SetRenderStyle(tree.RenderTreeStyle)
+	println(T.RenderTree())
+
+	println()
+	T.SetRenderStyle(tree.RenderFolderStyle)
+	println(T.RenderTree())
 }// >>>
