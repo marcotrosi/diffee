@@ -188,3 +188,4 @@ func main() {
 
 }
 
+// vim: fdm=marker fmr=<<<,>>>

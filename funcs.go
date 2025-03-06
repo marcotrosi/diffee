@@ -564,3 +564,5 @@ func Testing() {// <<<
 	T.SetRenderStyle(tree.RenderFolderStyle)
 	println(T.RenderTree())
 }// >>>
+
+// vim: fdm=marker fmr=<<<,>>>

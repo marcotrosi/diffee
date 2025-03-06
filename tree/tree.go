@@ -229,3 +229,5 @@ func (self *Tree) RenderTree() []string {// <<<
 
 	return Lines
 }// >>>
+
+// vim: fdm=marker fmr=<<<,>>>
