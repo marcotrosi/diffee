@@ -470,32 +470,32 @@ func convertSliceToTree(content *[]Entry, side string) *tree.Tree {// <<<
 		DecoratedText = decorateText(&Entry, side)
 
 		// // show only orphans
-		// if Arg_Orphans && (!Entry.IsOrphan["left"] && !Entry.IsOrphan["right"]) {
-		// 	if Entry.IsDir {
-		// 		HideDir = true
-		// 	} else {
-		// 		HideFile = true
-		// 	}
-		// } 
-      //
+		if Arg_Orphans && (!Entry.IsOrphan["left"] && !Entry.IsOrphan["right"]) {
+			if Entry.IsDir {
+				HideDir = true
+			} else {
+				HideFile = true
+			}
+		} 
+
 		// // show only none-orphans
-		// if Arg_NoOrphans && ((Entry.IsOrphan["left"]) || (Entry.IsOrphan["right"])) {
-		// 	if Entry.IsDir {
-		// 		HideDir = true
-		// 	} else {
-		// 		HideFile = true
-		// 	}
-		// } 
-      //
+		if Arg_NoOrphans && ((Entry.IsOrphan["left"]) || (Entry.IsOrphan["right"])) {
+			if Entry.IsDir {
+				HideDir = true
+			} else {
+				HideFile = true
+			}
+		} 
+
 		// // show only files with differences
-		// if Arg_Diff && (Entry.IsDir == false) && (Entry.Checksum["left"] == Entry.Checksum["right"]) {
-		// 	HideFile = true
-		// } 
-      //
+		if Arg_Diff && (Entry.IsDir == false) && (Entry.Checksum["left"] == Entry.Checksum["right"]) {
+			HideFile = true
+		} 
+
 		// // show only files that are same
-		// if Arg_Same && (Entry.IsDir == false) && (Entry.Checksum["left"] != Entry.Checksum["right"]) {
-		// 	HideFile = true
-		// } 
+		if Arg_Same && (Entry.IsDir == false) && (Entry.Checksum["left"] != Entry.Checksum["right"]) {
+			HideFile = true
+		} 
 
 		HideEntry = HideFile || HideDir
 		Stack[LastDepth].AddChild(DecoratedText).HideNode(HideEntry)
