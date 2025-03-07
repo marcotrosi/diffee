@@ -62,8 +62,18 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 | `--same`                     | Show only same files, hide files with differences.                                                                                                                       | 
 
 
-## Ideas
+## ToDo
 
+- hide empty folders
+- Maybe the performance can be improved by using multi-threading?
+- default diff detection by size followed by checksum if size is same
+- combine diff states and use enums
+- use no color hint given at Github
+- should I replace the booleans with bits?
+- `-i` ignore casing
+- `-I` like `--respect-vcs-ignore`
+- second `--all` or `-A` to also not skip .git folders?
+- use better args parser? https://pkg.go.dev/github.com/akamensky/argparse
 - `--interactive/-i` interactive mode to bring it much closer to `Beyond Compare`.
 	- copy
 	- delete
@@ -77,15 +87,4 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- open/close folders
 	- swap sides
 	- --filediffcmd="icdiff {} {}"  or env var
-- `-u/--unified`
-- `--respect-vcs-ignore`
-- second `--all` or `-A` to also not skip .git folders?
-- use better args parser? https://pkg.go.dev/github.com/akamensky/argparse
-- `--ignore <regex>` Do not check for differences on paths that match the regex pattern. do I really need this?
-- auto-depth - to not descent into folders that don't have differences, to reduce print output
-- Maybe the performance can be improved by using multi-threading?
-- default diff detection by size followed by checksum if size is same
-- combine diff states and use enums
-- use no color hint given at Github
-- should I replace the booleans with bits?
 
