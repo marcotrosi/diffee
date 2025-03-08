@@ -40,7 +40,7 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 
 ## Options
 
-| Option                   | Description                                                                                                                                                              | 
+|          Option          | Description                                                                                                                                                              | 
 |--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `-version`               | Print version.                                                                                                                                                           | 
 | `-help`                  | Print help.                                                                                                                                                              | 
