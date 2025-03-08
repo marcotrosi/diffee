@@ -40,40 +40,47 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 
 ## Options
 
-| Option                       | Description                                                                                                                                                              | 
-|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `--version/-v`               | Print version.                                                                                                                                                           | 
-| `--help/-h`                  | Print help.                                                                                                                                                              | 
-| `--flat/-f`                  | Print flat diff, without tree view.                                                                                                                                      | 
-| `--all/-a`                   | By default hidden folders/files (dotfiles) are ignored, this option turns this behavior off.                                                                             | 
-| `--depth <value>/-d <value>` | By default directory trees are traversed recursively all the way down, which is the same as `-depth 0`. But the depth can also be limited by providing a non-zero value. | 
-| `--info`                     | Print information on differences (checksum, size, modtime).                                                                                                              | 
-| `--swap/-w`                  | Swap sides.                                                                                                                                                              | 
-| `--no-color/-n`              | Print without colors.                                                                                                                                                    | 
-| `--include <regex>`          | Include paths that match the regex pattern. Can be used multiple times.                                                                                                  | 
-| `--exclude <regex>`          | Exclude paths that match the regex pattern. If `--include` is used `--exclude` is applied on paths matching the _include regex_. Can be used multiple times.             | 
-| `--files`                    | Only show files, don't care about empty dirs.                                                                                                                            | 
-| `--crc32`                    | Use crc32 checksum to detect if files are different.                                                                                                                     | 
-| `--size/-s`                  | Use file size to detect if files are different.                                                                                                                          | 
-| `--time/-t`                  | Use modification time to detect if files are different.                                                                                                                  | 
-| `--no-orphans/-O`            | Do not show orphans.                                                                                                                                                     | 
-| `--orphans/-o`               | Only show orphans.                                                                                                                                                       | 
-| `--diff`                     | Show only differences, hide same files.                                                                                                                                  | 
-| `--same`                     | Show only same files, hide files with differences.                                                                                                                       | 
+| Option                   | Description                                                                                                                                                              | 
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `-version`               | Print version.                                                                                                                                                           | 
+| `-help`                  | Print help.                                                                                                                                                              | 
+| `-flat`                  | Print flat diff, without tree view.                                                                                                                                      | 
+| `-all`                   | By default hidden folders/files (dotfiles) are ignored, this option turns this behavior off.                                                                             | 
+| `-depth <value>`         | By default directory trees are traversed recursively all the way down, which is the same as `-depth 0`. But the depth can also be limited by providing a non-zero value. | 
+| `-info`                  | Print information on differences (checksum, size, modtime).                                                                                                              | 
+| `-swap`                  | Swap sides.                                                                                                                                                              | 
+| `-no-color`              | Print without colors.                                                                                                                                                    | 
+| `-include <regex>`       | Include paths that match the regex pattern. Can be used multiple times.                                                                                                  | 
+| `-exclude <regex>`       | Exclude paths that match the regex pattern. If `--include` is used `--exclude` is applied on paths matching the _include regex_. Can be used multiple times.             | 
+| `-files`                 | Only show files, don't care about empty dirs.                                                                                                                            | 
+| `-crc32`                 | Use crc32 checksum to detect if files are different.                                                                                                                     | 
+| `-size`                  | Use file size to detect if files are different.                                                                                                                          | 
+| `-time`                  | Use modification time to detect if files are different.                                                                                                                  | 
+| `-no-orphans`            | Do not show orphans.                                                                                                                                                     | 
+| `-orphans`               | Only show orphans.                                                                                                                                                       | 
+| `-diff`                  | Show only differences, hide same files.                                                                                                                                  | 
+| `-same`                  | Show only same files, hide files with differences.                                                                                                                       | 
 
 
 ## ToDo
 
-- hide empty folders
+- hide empty folders --no-empty, --empty ?
+- check how --files works and make sure it's correct
+- --folders
+- --missing --orphans, --no-missing --no-orphans
+--left-orphans/--right-missing, --right-orphans/--left-missing
 - Maybe the performance can be improved by using multi-threading?
 - default diff detection by size followed by checksum if size is same
 - combine diff states and use enums
 - use no color hint given at Github
 - should I replace the booleans with bits?
+- generate bash completion
+- document code/workflow/strategy
 - `-i` ignore casing
 - `-I` like `--respect-vcs-ignore`
 - second `--all` or `-A` to also not skip .git folders?
 - use better args parser? https://pkg.go.dev/github.com/akamensky/argparse
+- config file for default flags and colors
 - `--interactive/-i` interactive mode to bring it much closer to `Beyond Compare`.
 	- copy
 	- delete

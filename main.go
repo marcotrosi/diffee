@@ -122,16 +122,16 @@ func main() {
 	}
 	// >>>
 
-	// print help <<<
-	if flag.NArg() == 0 || Arg_Help {
-		printHelp()
+	// print version <<<
+	if Arg_Version {
+		fmt.Println(Version_s)
 		os.Exit(OK)
 	}
 	// >>>
 
-	// print version <<<
-	if Arg_Version {
-		fmt.Println(Version_s)
+	// print help <<<
+	if flag.NArg() == 0 || Arg_Help {
+		printHelp()
 		os.Exit(OK)
 	}
 	// >>>
