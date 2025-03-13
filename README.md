@@ -68,20 +68,29 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 - check how --files works and make sure it's correct
 - --folders
 - --missing --orphans, --no-missing --no-orphans
---left-orphans/--right-missing, --right-orphans/--left-missing
-- Maybe the performance can be improved by using multi-threading?
+- --left-orphans/--right-missing, --right-orphans/--left-missing
 - default diff detection by size followed by checksum if size is same
-- combine diff states and use enums
 - use no color hint given at Github
+- config file for default flags and colors
+- finish -flat, -q/-Q to wrap in ' and " quote
+
+- combine diff states and use enums
 - should I replace the booleans with bits?
+- second `--all` or `--All/-A` to also not skip .git folders?
+- how to handle big depths that don't fit on screen?
+
+- `-I` like `--respect-vcs-ignore`
+- ignore casing on Windows if ever supported, highlight orange if different
+- ignore casing `-i/-c` can it be useful for unixoids?
+- Maybe the performance can be improved by using multi-threading?
+
 - generate bash completion
 - document code/workflow/strategy
-- `-i` ignore casing
-- `-I` like `--respect-vcs-ignore`
-- second `--all` or `-A` to also not skip .git folders?
+- write system and unit tests
 - use better args parser? https://pkg.go.dev/github.com/akamensky/argparse
-- config file for default flags and colors
+
 - `--interactive/-i` interactive mode to bring it much closer to `Beyond Compare`.
+    - has to use some kind of view/window in case the tree doesn't fit on its half side
 	- copy
 	- delete
 	- exclude
@@ -93,5 +102,5 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- navigate tree
 	- open/close folders
 	- swap sides
-	- --filediffcmd="icdiff {} {}"  or env var
+	- --filediffcmd="icdiff {} {}"  and/or config/env var
 
