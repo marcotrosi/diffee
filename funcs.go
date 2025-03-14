@@ -197,6 +197,12 @@ func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) 
 			}
 		}
 
+		if Arg_Folders {
+			if info.IsDir() == false {
+				return nil
+			}
+		}
+
 		if Arg_Files || (len(Arg_Include) > 0) {
 			SplitPath := strings.SplitAfter(fpath, "/")
 			CombinedPath := ""
@@ -454,7 +460,7 @@ func convertSliceToTree(content *[]Entry, side string) *tree.Tree {// <<<
 
 		DecoratedText = decorateText(&Entry, side)
 
-		// // show only orphans
+		// show only orphans
 		if Arg_Orphans && (!Entry.IsOrphan["left"] && !Entry.IsOrphan["right"]) {
 			if Entry.IsDir {
 				HideDir = true
@@ -463,7 +469,7 @@ func convertSliceToTree(content *[]Entry, side string) *tree.Tree {// <<<
 			}
 		} 
 
-		// // show only none-orphans
+		// show only none-orphans
 		if Arg_NoOrphans && ((Entry.IsOrphan["left"]) || (Entry.IsOrphan["right"])) {
 			if Entry.IsDir {
 				HideDir = true
@@ -472,12 +478,38 @@ func convertSliceToTree(content *[]Entry, side string) *tree.Tree {// <<<
 			}
 		} 
 
-		// // show only files with differences
+		// show only left orphans
+		if Arg_LeftOrphans {
+			if Entry.IsDir {
+				if Entry.IsMissing["left"] {
+					HideDir = true
+				}
+			} else {
+				if Entry.IsMissing["left"] || (!Entry.IsMissing["left"] && !Entry.IsMissing["right"]) {
+					HideFile = true
+				}
+			} 
+		} 
+
+		// show only right orphans
+		if Arg_RightOrphans {
+			if Entry.IsDir {
+				if Entry.IsMissing["right"] {
+					HideDir = true
+				}
+			} else {
+				if Entry.IsMissing["right"] || (!Entry.IsMissing["left"] && !Entry.IsMissing["right"]) {
+					HideFile = true
+				}
+			} 
+		} 
+
+		// show only files with differences
 		if Arg_Diff && (Entry.IsDir == false) && (Entry.Checksum["left"] == Entry.Checksum["right"]) {
 			HideFile = true
 		} 
 
-		// // show only files that are same
+		// show only files that are same
 		if Arg_Same && (Entry.IsDir == false) && (Entry.Checksum["left"] != Entry.Checksum["right"]) {
 			HideFile = true
 		} 
@@ -533,21 +565,28 @@ func Testing() {// <<<
 		AddChild("grandgrandkid").
 		AddSibling("grandgrandkid")
 
-	println()
-	T.SetRenderStyle(tree.RenderTabsStyle)
-	println(T.RenderTree())
+	// println()
+	// T.SetRenderStyle(tree.RenderTabsStyle)
+	// println(T.RenderTree())
+   //
+	// println()
+	// T.SetRenderStyle(tree.RenderNumberedStyle)
+	// println(T.RenderTree())
+   //
+	// println()
+	// T.SetRenderStyle(tree.RenderTreeStyle)
+	// println(T.RenderTree())
+   //
+	// println()
+	// T.SetRenderStyle(tree.RenderFolderStyle)
+	// println(T.RenderTree())
 
-	println()
-	T.SetRenderStyle(tree.RenderNumberedStyle)
-	println(T.RenderTree())
+	// filter := func(n *tree.Node) bool {return strings.Contains(n.GetText(), "child")}
+	filter := func(n *tree.Node) bool {return n.GetDepth() == 2}
 
-	println()
-	T.SetRenderStyle(tree.RenderTreeStyle)
-	println(T.RenderTree())
-
-	println()
-	T.SetRenderStyle(tree.RenderFolderStyle)
-	println(T.RenderTree())
+	for node := range T.Iterate(filter) {
+		println(node.GetText(), node.GetDepth())
+	}
 }// >>>
 
 // vim: fdm=marker fmr=<<<,>>>

@@ -11,6 +11,7 @@ type Node struct {// <<<
 	hidechildren bool
 	parent       *Node
 	children   []*Node
+	depth        int
 }// >>>
 
 func (self *Node) GetText() string {// <<<
@@ -82,15 +83,40 @@ func (self *Node) CountChildren(visible bool) int {// <<<
 }// >>>
 
 func (self *Node) AddChild(txt string) *Node {// <<<
-	Newborn := &Node{parent: self, text: txt, hidenode: false, hidechildren: false}
+	Newborn := &Node{parent: self, text: txt, hidenode: false, hidechildren: false, depth: self.depth+1}
 	self.children = append(self.children, Newborn)
 	return Newborn
 }// >>>
 
 func (self *Node) AddSibling(txt string) *Node {// <<<
-	Newborn := &Node{parent: self.parent, text: txt, hidenode: false, hidechildren: false}
+	Newborn := &Node{parent: self.parent, text: txt, hidenode: false, hidechildren: false, depth: self.depth}
 	self.parent.children = append(self.parent.children, Newborn)
 	return Newborn
+}// >>>
+
+func (self *Node) GetDepth() int {// <<<
+	return self.depth
+}// >>>
+
+func (self *Node) Iterate(filter func(*Node) bool) <-chan *Node {// <<<
+	// example for a filter function -> filter := func(n *tree.Node) bool {return n.GetDepth() == 2}
+	ch := make(chan *Node)
+
+	go func() {
+		defer close(ch)
+		var visit func(*Node)
+		visit = func(node *Node) {
+			if filter == nil || filter(node) {
+				ch <- node
+			}
+			for _, child := range node.children {
+				visit(child)
+			}
+		}
+		visit(self)
+	}()
+
+	return ch
 }// >>>
 
 type Tree struct {// <<<
@@ -189,6 +215,7 @@ func NewTree(txt string) *Tree {// <<<
 	t.SetText(txt)
 	t.parent = nil
 	t.offset = 0
+	t.depth  = 0
 	t.renderline = RenderTreeStyle
 	return &t
 }// >>>
