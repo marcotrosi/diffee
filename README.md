@@ -40,26 +40,34 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 
 ## Options
 
-|             Option             | Description                                                                                                                                                              | 
+|             Option             | Description                                                                                                                                                              |
 |--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `-version`                     | Print version.                                                                                                                                                           | 
-| `-help`                        | Print help.                                                                                                                                                              | 
-| `-flat`                        | Print flat diff, without tree view.                                                                                                                                      | 
-| `-all`                         | By default hidden folders/files (dotfiles) are ignored, this option turns this behavior off.                                                                             | 
-| `-depth <value>`               | By default directory trees are traversed recursively all the way down, which is the same as `-depth 0`. But the depth can also be limited by providing a non-zero value. | 
-| `-info`                        | Print information on differences (checksum, size, modtime).                                                                                                              | 
-| `-swap`                        | Swap sides.                                                                                                                                                              | 
-| `-no-color`                    | Print without colors.                                                                                                                                                    | 
-| `-include <regex>`             | Include paths that match the regex pattern. Can be used multiple times.                                                                                                  | 
-| `-exclude <regex>`             | Exclude paths that match the regex pattern. If `--include` is used `--exclude` is applied on paths matching the _include regex_. Can be used multiple times.             | 
-| `-files`                       | Only show files, don't care about empty dirs.                                                                                                                            | 
-| `-crc32`                       | Use crc32 checksum to detect if files are different.                                                                                                                     | 
-| `-size`                        | Use file size to detect if files are different.                                                                                                                          | 
-| `-time`                        | Use modification time to detect if files are different.                                                                                                                  | 
-| `-no-orphans`                  | Do not show orphans.                                                                                                                                                     | 
-| `-orphans`                     | Only show orphans.                                                                                                                                                       | 
-| `-diff`                        | Show only differences, hide same files.                                                                                                                                  | 
-| `-same`                        | Show only same files, hide files with differences.                                                                                                                       | 
+| `--version`/`-v`               | Print version.                                                                                                                                                           |
+| `--help`/`-h`                  | Print help.                                                                                                                                                              |
+| `--flat`/`-I`                  | Print flat diff, without tree view.                                                                                                                                      |
+| `--all`/`-a`                   | By default hidden folders/files (dotfiles) are ignored, this option turns this behavior off.                                                                             |
+| `--depth <value>`/`-p <value>` | By default directory trees are traversed recursively all the way down, which is the same as `-depth 0`. But the depth can also be limited by providing a non-zero value. |
+| `--info`/`-i`                  | Print information on differences (checksum, size, modtime).                                                                                                              |
+| `--swap`/`-x`                  | Swap sides.                                                                                                                                                              |
+| `--no-color`/`-C`              | Print without colors.                                                                                                                                                    |
+| `--include <regex>`            | Include paths that match the regex pattern. Can be used multiple times.                                                                                                  |
+| `--exclude <regex>`            | Exclude paths that match the regex pattern. If `--include` is used `--exclude` is applied on paths matching the _include regex_. Can be used multiple times.             |
+| `--files`/`-f`                 | Only show files.                                                                                                                                                         |
+| `--folders`/`-F`               | Only show folders.                                                                                                                                                       |
+| `--no-empty`/`-E`              | Do not show empty folders.                                                                                                                                               |
+| `--crc32`/`-c`                 | Use crc32 checksum to detect if files are different.                                                                                                                     |
+| `--size`/`-s`                  | Use file size to detect if files are different.                                                                                                                          |
+| `--time`/`-t`                  | Use modification time to detect if files are different.                                                                                                                  |
+| `--orphans`/`-o`               | Only show orphans.                                                                                                                                                       |
+| `--no-orphans`/`-O`            | Do not show orphans.                                                                                                                                                     |
+| `--left-orphans`/`-l`          | Show only left orphans, same as --right-missing.                                                                                                                         |
+| `--right-missing`/`-R`         | Show only right missing, same as --left-orphans.                                                                                                                         |
+| `--right-orphans`/`-r`         | Show only right orphans, same as --left-missing.                                                                                                                         |
+| `--left-missing`/`-L`          | Show only left missing, same as --right-orphans.                                                                                                                         |
+| `--diff`/`-d`                  | Show only differences, hide same files.                                                                                                                                  |
+| `--same`/`-m`                  | Show only same files, hide files with differences.                                                                                                                       |
+| `--bash`/`-b`                  | Generate bash-completion script.                                                                                                                                         |
+
 
 
 ## ToDo

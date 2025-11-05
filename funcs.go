@@ -407,129 +407,6 @@ func decorateText(entry *Entry, side string) string {// <<<
 	return (*entry).Name
 }// >>>
 
-// func convertSliceToTree(content *[]Entry, side string) *tree.Tree {// <<<
-//
-// 	var Result = tree.NewTree(StyleRoot.Render((*content)[0].Path[side]))
-// 	// var Result = tree.NewTree(&((*content)[0])).SetText(StyleRoot.Render((*content)[0].Path[side]))
-// 	var Stack []*tree.Node
-// 	var LastDepth     int = 0
-// 	var CurrentDepth  int = 0
-// 	var HideEntry     bool= false
-// 	var HideFile      bool= false
-// 	var HideDir       bool= false
-//
-// 	Stack = append(Stack, &(Result.Node))
-//
-// 	for i := 1; i < len(*content); i++ {
-//
-// 		HideFile  = false
-// 		HideEntry = false
-//
-// 		E := (*content)[i]
-//
-// 		CurrentDepth = strings.Count(E.NormPath, "/") // count slashes to determine current tree depth
-// 		if E.IsDir {
-// 			CurrentDepth = CurrentDepth - 1
-// 		}
-//
-// 		if CurrentDepth > LastDepth { // push new child onto stack
-// 			Stack = append(Stack, Stack[LastDepth].GetChild(-1))
-// 			LastDepth = CurrentDepth
-// 		} else if CurrentDepth < LastDepth { // pop from stack as many as we go directories upwards
-//
-// 			if Arg_HideEmpty {
-// 				for i:=(len(Stack)-1) ; i>=(len(Stack)-(LastDepth-CurrentDepth)); i-- {
-// 					if Stack[i].CountChildren(true) == 0 {
-// 						Stack[i].HideNode(true)
-// 					} else {
-// 						println(Stack[i].GetText(), Stack[i].CountChildren(true))
-// 					}
-// 				}
-// 			}
-//
-// 			Stack = Stack[:len(Stack)-(LastDepth-CurrentDepth)]
-// 			LastDepth = CurrentDepth
-// 			HideDir = false
-// 		} else {
-//
-// 			if Arg_HideEmpty {
-// 				// check if previous sibling is empty folder
-// 				// println(len(Stack)-1, CurrentDepth)
-// 				// println(Stack[CurrentDepth].GetChild(-1))
-// 				println(Stack[CurrentDepth].GetChild(-1).GetData())
-// 				// if Stack[len(Stack)-1].GetChild(-1).GetData().IsDir {
-// 				// 	if Stack[len(Stack)-1].GetChild(-1).CountChildren(true) == 0 {
-// 				// 		Stack[len(Stack)-1].GetChild(-1).HideNode(true)
-// 				// 	}
-// 				// }
-// 			}
-//
-// 			if E.IsDir {
-// 				HideDir = false
-// 			}
-// 		}
-//
-// 		// show only orphans
-// 		if Arg_Orphans && (!E.IsOrphan["left"] && !E.IsOrphan["right"]) {
-// 			if E.IsDir {
-// 				HideDir = true
-// 			} else {
-// 				HideFile = true
-// 			}
-// 		} 
-//
-// 		// show only none-orphans
-// 		if Arg_NoOrphans && ((E.IsOrphan["left"]) || (E.IsOrphan["right"])) {
-// 			if E.IsDir {
-// 				HideDir = true
-// 			} else {
-// 				HideFile = true
-// 			}
-// 		} 
-//
-// 		// show only left orphans
-// 		if Arg_LeftOrphans {
-// 			if E.IsDir {
-// 				if E.IsMissing["left"] {
-// 					HideDir = true
-// 				}
-// 			} else {
-// 				if E.IsMissing["left"] || (!E.IsMissing["left"] && !E.IsMissing["right"]) {
-// 					HideFile = true
-// 				}
-// 			} 
-// 		} 
-//
-// 		// show only right orphans
-// 		if Arg_RightOrphans {
-// 			if E.IsDir {
-// 				if E.IsMissing["right"] {
-// 					HideDir = true
-// 				}
-// 			} else {
-// 				if E.IsMissing["right"] || (!E.IsMissing["left"] && !E.IsMissing["right"]) {
-// 					HideFile = true
-// 				}
-// 			} 
-// 		} 
-//
-// 		// show only files with differences
-// 		if Arg_Diff && (E.IsDir == false) && (E.Checksum["left"] == E.Checksum["right"]) {
-// 			HideFile = true
-// 		} 
-//
-// 		// show only files that are same
-// 		if Arg_Same && (E.IsDir == false) && (E.Checksum["left"] != E.Checksum["right"]) {
-// 			HideFile = true
-// 		} 
-//
-// 		HideEntry = HideFile || HideDir
-// 		Stack[LastDepth].AddChild(&E).SetText(decorateText(&E, side)).HideNode(HideEntry)
-// 	}
-//
-// 	return Result
-// }// >>>
-
 func convertSliceToTree(content *[]Entry, side string) *tree.Tree { // <<<
 
 	var Result = tree.NewTree(StyleRoot.Render((*content)[0].Path[side]))
@@ -620,7 +497,7 @@ func filterTrees(leftNode *tree.Node, rightNode *tree.Node) {// <<<
 		// --- Hide Empty (THE KEY FIX) ---
 		// A directory is only hidden if it's considered empty on *both* sides.
 		// Since child nodes are already filtered, CountChildren(true) is accurate.
-		if !shouldHide && Arg_HideEmpty {
+		if !shouldHide && Arg_NoEmpty {
 			if leftNode.CountChildren(true) == 0 && rightNode.CountChildren(true) == 0 {
 				shouldHide = true
 			}

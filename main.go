@@ -38,7 +38,7 @@ var (
 	Arg_RightOrphans bool
 	Arg_Files        bool
 	Arg_Folders      bool
-	Arg_HideEmpty    bool
+	Arg_NoEmpty      bool
 	Arg_Diff         bool
 	Arg_Same         bool
 	Arg_Bash         bool
@@ -79,6 +79,7 @@ func main() {
 		Short: "Diff directories",
 		Run: func(cmd *cobra.Command, args []string) {
 
+			// check cli args <<<
 			if Arg_Version {
 				fmt.Println(Version_s)
 				return
@@ -90,14 +91,11 @@ func main() {
 			}
 
 			if Arg_Bash {
-				// rootCmd.CompletionOptions.DisableDefaultCmd = false
-				// rootCmd.GenBashCompletionFile("mytool.bash")
 				return
 			}
 
-			// check cli args <<<
 			if len(args) > 2 {
-				printError("too many args")
+				printError("too many arguments")
 				os.Exit(TOO_MANY_ARGS)
 			}
 
@@ -105,7 +103,7 @@ func main() {
 			if Arg_Time  { XORDiffType += 1 }
 			if Arg_CRC32 { XORDiffType += 1 }
 			if XORDiffType > 1 {
-				printError("-size, -time and -crc32 are mutual exclusive, use only one")
+				printError("--size, --time and --crc32 are mutual exclusive, use only one")
 				os.Exit(EXCLUSIVE_OPTS)
 			}
 
@@ -114,33 +112,19 @@ func main() {
 			if Arg_LeftOrphans  { XOROrphanType += 1 }
 			if Arg_RightOrphans { XOROrphanType += 1 }
 			if XOROrphanType > 1 {
-				printError("-orphans, -no-orphans, -left-orphans/-right-missing and -right-orphans/-left-missing can not be used together, use only one")
+				printError("--orphans, --no-orphans, --left-orphans/--right-missing and --right-orphans/--left-missing can not be used together, use only one")
 				os.Exit(EXCLUSIVE_OPTS)
 			}
 
 			if Arg_Diff && Arg_Same {
-				printError("-diff and -same can not be used together, use only one")
+				printError("--diff and --same can not be used together, use only one")
 				os.Exit(EXCLUSIVE_OPTS)
 			}
 
 			if Arg_Files && Arg_Folders {
-				printError("-files and -folders can not be used together, use only one")
+				printError("--files and --folders can not be used together, use only one")
 				os.Exit(EXCLUSIVE_OPTS)
 			}
-			// >>>
-
-			// print version <<<
-			// if Arg_Version {
-			// 	fmt.Println(Version_s)
-			// 	os.Exit(OK)
-			// }
-			// >>>
-
-			// print help <<<
-			// if len(args) == 0 || Arg_Help {
-			// 	printHelp()
-			// 	os.Exit(OK)
-			// }
 			// >>>
 
 			// no color <<<
@@ -150,13 +134,6 @@ func main() {
 			// >>>
 
 			// get directory paths from args <<<
-			// if flag.NArg() == 1 {
-			// 	LeftDir  = "./"
-			// 	RightDir = path.Clean(flag.Arg(0)) + "/"
-			// } else { // 2 args given
-			// 	LeftDir  = path.Clean(flag.Arg(0)) + "/"
-			// 	RightDir = path.Clean(flag.Arg(1)) + "/"
-			// }
 			switch len(args) {
 			case 1:
 				LeftDir = "./"
@@ -205,6 +182,7 @@ func main() {
 	}
 	// >>>
 
+	// commandline parameter definition <<<
 	// flags (bools)
 	rootCmd.Flags().BoolVarP(&Arg_Version      , "version"      , "v", false , "print version")
 	rootCmd.Flags().BoolVarP(&Arg_Flat         , "flat"         , "I", false , "print differences flat")
@@ -215,7 +193,7 @@ func main() {
 	rootCmd.Flags().BoolVarP(&Arg_Info         , "info"         , "i", false , "print file diff info")
 	rootCmd.Flags().BoolVarP(&Arg_Swap         , "swap"         , "x", false , "swap sides")
 	rootCmd.Flags().IntVarP(&Arg_Depth         , "depth"        , "p", 0     , "limit depth, 0 is no limit")
-	rootCmd.Flags().BoolVarP(&Arg_NoColor      , "no-color"     , "n", false , "turn colored output off")
+	rootCmd.Flags().BoolVarP(&Arg_NoColor      , "no-color"     , "C", false , "turn colored output off")
 	rootCmd.Flags().BoolVarP(&Arg_Orphans      , "orphans"      , "o", false , "show only orphans")
 	rootCmd.Flags().BoolVarP(&Arg_NoOrphans    , "no-orphans"   , "O", false , "do not show orphans")
 	rootCmd.Flags().BoolVarP(&Arg_LeftOrphans  , "left-orphans" , "l", false , "show only left orphans, same as --right-missing")
@@ -224,7 +202,7 @@ func main() {
 	rootCmd.Flags().BoolVarP(&Arg_RightOrphans , "left-missing" , "L", false , "show only left missing, same as --right-orphans")
 	rootCmd.Flags().BoolVarP(&Arg_Files        , "files"        , "f", false , "show only files, no empty folders")
 	rootCmd.Flags().BoolVarP(&Arg_Folders      , "folders"      , "F", false , "show only folders")
-	rootCmd.Flags().BoolVarP(&Arg_HideEmpty    , "hide-empty"   , "E", false , "hide empty folders")
+	rootCmd.Flags().BoolVarP(&Arg_NoEmpty      , "no-empty"     , "E", false , "do not show empty folders")
 	rootCmd.Flags().BoolVarP(&Arg_Diff         , "diff"         , "d", false , "show only files that differ")
 	rootCmd.Flags().BoolVarP(&Arg_Same         , "same"         , "m", false , "show only files that are the same")
 	rootCmd.Flags().BoolVarP(&Arg_Bash         , "bash"         , "b", false , "generate bash-completion script")
@@ -232,6 +210,7 @@ func main() {
 	// multi-value flags
 	rootCmd.Flags().Var(&Arg_Exclude, "exclude", "exclude matching paths from diff")
 	rootCmd.Flags().Var(&Arg_Include, "include", "exclude non-matching paths from diff")
+	// >>>
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
