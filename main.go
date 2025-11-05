@@ -3,9 +3,9 @@ package main
 import ( // <<<
 	"os"
 	"fmt"
-	"flag"
 	"path"
 	"regexp"
+	"github.com/spf13/cobra"
 ) // >>>
 
 // global variables, constants and types <<<
@@ -14,6 +14,7 @@ const Version_s string = "0.1.0"
 const (
 	OK int = iota
 	INTERNAL
+	CMDLINE
 	TOO_MANY_ARGS
 	NOT_A_DIR
 	EXCLUSIVE_OPTS
@@ -40,6 +41,7 @@ var (
 	Arg_HideEmpty    bool
 	Arg_Diff         bool
 	Arg_Same         bool
+	Arg_Bash         bool
 	Arg_Exclude      RegExes
 	Arg_Include      RegExes
 )
@@ -53,6 +55,10 @@ func (n *RegExes) String() string {
 func (n *RegExes) Set(value string) error {
     *n = append(*n, regexp.MustCompile(value))
     return nil
+}
+
+func (n *RegExes) Type() string {
+    return "regex"
 }
 // >>>
 
@@ -68,131 +74,179 @@ func main() {
 	// >>>
 
 	// parse cli args <<<
-	flag.BoolVar(&Arg_Version       , "version"         , false, "print version"                                 )
-	flag.BoolVar(&Arg_Help          , "help"            , false, "print help"                                    )
-	flag.BoolVar(&Arg_Flat          , "flat"            , false, "print differences flat"                        )
-	flag.BoolVar(&Arg_All           , "all"             , false, "don't ignore dotfiles"                         )
-	flag.BoolVar(&Arg_Size          , "size"            , false, "compare file size"                             )
-	flag.BoolVar(&Arg_Time          , "time"            , false, "compare modification time"                     )
-	flag.BoolVar(&Arg_CRC32         , "crc32"           , false, "compare CRC32 checksum"                        )
-	flag.BoolVar(&Arg_Info          , "info"            , false, "print file diff info"                          )
-	flag.BoolVar(&Arg_Swap          , "swap"            , false, "swap sides"                                    )
-	flag.IntVar (&Arg_Depth         , "depth"           , 0    , "limit depth, 0 is no limit"                    )
-	flag.BoolVar(&Arg_NoColor       , "no-color"        , false, "turn colored output off"                       )
-	flag.BoolVar(&Arg_Orphans       , "orphans"         , false, "show only orphans"                             )
-	flag.BoolVar(&Arg_NoOrphans     , "no-orphans"      , false, "do not show orphans"                           )
-	flag.BoolVar(&Arg_LeftOrphans   , "left-orphans"    , false, "show only left orphans, same as -right-missing")
-	flag.BoolVar(&Arg_LeftOrphans   , "right-missing"   , false, "show only right missing, same as -left-orphans")
-	flag.BoolVar(&Arg_RightOrphans  , "right-orphans"   , false, "show only right orphans, same as -left-missing")
-	flag.BoolVar(&Arg_RightOrphans  , "left-missing"    , false, "show only left missing, same as -right-orphans")
-	flag.BoolVar(&Arg_Files         , "files"           , false, "show only files, no empty folders"             )
-	flag.BoolVar(&Arg_Folders       , "folders"         , false, "show only folders"                             )
-	flag.BoolVar(&Arg_HideEmpty     , "hide-empty"      , false, "hide empty folders"                            )
-	flag.BoolVar(&Arg_Diff          , "diff"            , false, "show only files that differ"                   )
-	flag.BoolVar(&Arg_Same          , "same"            , false, "show only files that are the same"             )
-	flag.Var    (&Arg_Exclude       , "exclude"         ,        "exclude matching paths from diff"              )
-	flag.Var    (&Arg_Include       , "include"         ,        "exclude non-matching paths from diff"          )
-	flag.Parse()
+	rootCmd := &cobra.Command{
+		Use:   Tool_s,
+		Short: "Diff directories",
+		Run: func(cmd *cobra.Command, args []string) {
+
+			if Arg_Version {
+				fmt.Println(Version_s)
+				return
+			}
+
+			if Arg_Help {
+				cmd.Help()
+				return
+			}
+
+			if Arg_Bash {
+				// rootCmd.CompletionOptions.DisableDefaultCmd = false
+				// rootCmd.GenBashCompletionFile("mytool.bash")
+				return
+			}
+
+			// check cli args <<<
+			if len(args) > 2 {
+				printError("too many args")
+				os.Exit(TOO_MANY_ARGS)
+			}
+
+			if Arg_Size  { XORDiffType += 1 }
+			if Arg_Time  { XORDiffType += 1 }
+			if Arg_CRC32 { XORDiffType += 1 }
+			if XORDiffType > 1 {
+				printError("-size, -time and -crc32 are mutual exclusive, use only one")
+				os.Exit(EXCLUSIVE_OPTS)
+			}
+
+			if Arg_Orphans      { XOROrphanType += 1 }
+			if Arg_NoOrphans    { XOROrphanType += 1 }
+			if Arg_LeftOrphans  { XOROrphanType += 1 }
+			if Arg_RightOrphans { XOROrphanType += 1 }
+			if XOROrphanType > 1 {
+				printError("-orphans, -no-orphans, -left-orphans/-right-missing and -right-orphans/-left-missing can not be used together, use only one")
+				os.Exit(EXCLUSIVE_OPTS)
+			}
+
+			if Arg_Diff && Arg_Same {
+				printError("-diff and -same can not be used together, use only one")
+				os.Exit(EXCLUSIVE_OPTS)
+			}
+
+			if Arg_Files && Arg_Folders {
+				printError("-files and -folders can not be used together, use only one")
+				os.Exit(EXCLUSIVE_OPTS)
+			}
+			// >>>
+
+			// print version <<<
+			// if Arg_Version {
+			// 	fmt.Println(Version_s)
+			// 	os.Exit(OK)
+			// }
+			// >>>
+
+			// print help <<<
+			// if len(args) == 0 || Arg_Help {
+			// 	printHelp()
+			// 	os.Exit(OK)
+			// }
+			// >>>
+
+			// no color <<<
+			if Arg_NoColor {
+				setNoColor()
+			}
+			// >>>
+
+			// get directory paths from args <<<
+			// if flag.NArg() == 1 {
+			// 	LeftDir  = "./"
+			// 	RightDir = path.Clean(flag.Arg(0)) + "/"
+			// } else { // 2 args given
+			// 	LeftDir  = path.Clean(flag.Arg(0)) + "/"
+			// 	RightDir = path.Clean(flag.Arg(1)) + "/"
+			// }
+			switch len(args) {
+			case 1:
+				LeftDir = "./"
+				RightDir = path.Clean(args[0]) + "/"
+			case 2:
+				LeftDir = path.Clean(args[0]) + "/"
+				RightDir = path.Clean(args[1]) + "/"
+			}
+			// >>>
+
+			// check if dirs exists <<<
+			if isDirectory(LeftDir) == false {
+				printError("left is not a directory")
+				os.Exit(NOT_A_DIR)
+			}
+
+			if isDirectory(RightDir) == false {
+				printError("right is not a directory")
+				os.Exit(NOT_A_DIR)
+			}
+			// >>>
+
+			// get dir contents <<<
+			getUnionSetOfDirContents(LeftDir, RightDir, &UnionSetOfDirContents)
+			getDirContentInformation(LeftDir, RightDir, &UnionSetOfDirContents, &DirContentInformation)
+			// >>>
+
+			// print flat comparison <<<
+			if Arg_Flat {
+				printFlat(&DirContentInformation)
+				os.Exit(OK)
+			}// >>>
+
+			// start interactive comparison <<<
+			// if Interactive {
+			// runInteractive(&DirContentInformation)
+			// os.Exit(OK)
+			// } // >>>
+
+			// print side by side comparison <<<
+			printSideBySide(&DirContentInformation)
+			os.Exit(OK)
+			// >>>
+
+		},
+	}
 	// >>>
 
-	// check cli args <<<
-	if flag.NArg() > 2 {
-		printError("too many args")
-		os.Exit(TOO_MANY_ARGS)
+	// flags (bools)
+	rootCmd.Flags().BoolVarP(&Arg_Version      , "version"      , "v", false , "print version")
+	rootCmd.Flags().BoolVarP(&Arg_Flat         , "flat"         , "I", false , "print differences flat")
+	rootCmd.Flags().BoolVarP(&Arg_All          , "all"          , "a", false , "don't ignore dotfiles")
+	rootCmd.Flags().BoolVarP(&Arg_Size         , "size"         , "s", false , "compare file size")
+	rootCmd.Flags().BoolVarP(&Arg_Time         , "time"         , "t", false , "compare modification time")
+	rootCmd.Flags().BoolVarP(&Arg_CRC32        , "crc32"        , "c", false , "compare CRC32 checksum")
+	rootCmd.Flags().BoolVarP(&Arg_Info         , "info"         , "i", false , "print file diff info")
+	rootCmd.Flags().BoolVarP(&Arg_Swap         , "swap"         , "x", false , "swap sides")
+	rootCmd.Flags().IntVarP(&Arg_Depth         , "depth"        , "p", 0     , "limit depth, 0 is no limit")
+	rootCmd.Flags().BoolVarP(&Arg_NoColor      , "no-color"     , "n", false , "turn colored output off")
+	rootCmd.Flags().BoolVarP(&Arg_Orphans      , "orphans"      , "o", false , "show only orphans")
+	rootCmd.Flags().BoolVarP(&Arg_NoOrphans    , "no-orphans"   , "O", false , "do not show orphans")
+	rootCmd.Flags().BoolVarP(&Arg_LeftOrphans  , "left-orphans" , "l", false , "show only left orphans, same as --right-missing")
+	rootCmd.Flags().BoolVarP(&Arg_LeftOrphans  , "right-missing", "R", false , "show only right missing, same as --left-orphans")
+	rootCmd.Flags().BoolVarP(&Arg_RightOrphans , "right-orphans", "r", false , "show only right orphans, same as --left-missing")
+	rootCmd.Flags().BoolVarP(&Arg_RightOrphans , "left-missing" , "L", false , "show only left missing, same as --right-orphans")
+	rootCmd.Flags().BoolVarP(&Arg_Files        , "files"        , "f", false , "show only files, no empty folders")
+	rootCmd.Flags().BoolVarP(&Arg_Folders      , "folders"      , "F", false , "show only folders")
+	rootCmd.Flags().BoolVarP(&Arg_HideEmpty    , "hide-empty"   , "E", false , "hide empty folders")
+	rootCmd.Flags().BoolVarP(&Arg_Diff         , "diff"         , "d", false , "show only files that differ")
+	rootCmd.Flags().BoolVarP(&Arg_Same         , "same"         , "m", false , "show only files that are the same")
+	rootCmd.Flags().BoolVarP(&Arg_Bash         , "bash"         , "b", false , "generate bash-completion script")
+
+	// multi-value flags
+	rootCmd.Flags().Var(&Arg_Exclude, "exclude", "exclude matching paths from diff")
+	rootCmd.Flags().Var(&Arg_Include, "include", "exclude non-matching paths from diff")
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(CMDLINE)
 	}
 
-	if Arg_Size  { XORDiffType += 1 }
-	if Arg_Time  { XORDiffType += 1 }
-	if Arg_CRC32 { XORDiffType += 1 }
-	if XORDiffType > 1 {
-		printError("-size, -time and -crc32 are mutual exclusive, use only one")
-		os.Exit(EXCLUSIVE_OPTS)
-	}
-
-	if Arg_Orphans      { XOROrphanType += 1 }
-	if Arg_NoOrphans    { XOROrphanType += 1 }
-	if Arg_LeftOrphans  { XOROrphanType += 1 }
-	if Arg_RightOrphans { XOROrphanType += 1 }
-	if XOROrphanType > 1 {
-		printError("-orphans, -no-orphans, -left-orphans/-right-missing and -right-orphans/-left-missing can not be used together, use only one")
-		os.Exit(EXCLUSIVE_OPTS)
-	}
-
-	if Arg_Diff && Arg_Same {
-		printError("-diff and -same can not be used together, use only one")
-		os.Exit(EXCLUSIVE_OPTS)
-	}
-
-	if Arg_Files && Arg_Folders {
-		printError("-files and -folders can not be used together, use only one")
-		os.Exit(EXCLUSIVE_OPTS)
-	}
-	// >>>
-
-	// print version <<<
-	if Arg_Version {
-		fmt.Println(Version_s)
+	if Arg_Bash {
+		err := rootCmd.GenBashCompletionFile("diffee.bash")
+		if err != nil {
+			fmt.Println("Error generating bash completion:", err)
+			os.Exit(INTERNAL)
+		}
+		fmt.Println("Generated diffee.bash")
 		os.Exit(OK)
 	}
-	// >>>
-
-	// print help <<<
-	if flag.NArg() == 0 || Arg_Help {
-		printHelp()
-		os.Exit(OK)
-	}
-	// >>>
-
-	// no color <<<
-	if Arg_NoColor {
-		setNoColor()
-	}
-	// >>>
-
-	// get directory paths from args <<<
-	if flag.NArg() == 1 {
-		LeftDir  = "./"
-		RightDir = path.Clean(flag.Arg(0)) + "/"
-	} else { // 2 args given
-		LeftDir  = path.Clean(flag.Arg(0)) + "/"
-		RightDir = path.Clean(flag.Arg(1)) + "/"
-	}
-	// >>>
-
-	// check if dirs exists <<<
-	if isDirectory(LeftDir) == false {
-		printError("left is not a directory")
-		os.Exit(NOT_A_DIR)
-	}
-
-	if isDirectory(RightDir) == false {
-		printError("right is not a directory")
-		os.Exit(NOT_A_DIR)
-	}
-	// >>>
-
-	// get dir contents <<<
-	getUnionSetOfDirContents(LeftDir, RightDir, &UnionSetOfDirContents)
-	getDirContentInformation(LeftDir, RightDir, &UnionSetOfDirContents, &DirContentInformation)
-	// >>>
-
-	// print flat comparison <<<
-	if Arg_Flat {
-		printFlat(&DirContentInformation)
-		os.Exit(OK)
-	}// >>>
-	
-	// start interactive comparison <<<
-	// if Interactive {
-		// runInteractive(&DirContentInformation)
-		// os.Exit(OK)
-	// } // >>>
-
-	// print side by side comparison <<<
-	printSideBySide(&DirContentInformation)
-	os.Exit(OK)
-	// >>>
-
 }
 
 // vim: fdm=marker fmr=<<<,>>>
