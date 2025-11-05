@@ -6,6 +6,7 @@ import (// <<<
 )// >>>
 
 type Node struct {// <<<
+	data         any
 	text         string
 	hidenode     bool
 	hidechildren bool
@@ -14,13 +15,30 @@ type Node struct {// <<<
 	depth        int
 }// >>>
 
-func (self *Node) GetText() string {// <<<
-	return self.text
+func (self *Node) SetData(d any) *Node {// <<<
+
+	self.data = d
+
+	if str, ok := d.(fmt.Stringer); ok {
+		self.text = str.String()
+	} else {
+		self.text = fmt.Sprintf("%v", d)
+	}
+
+	return self
+}// >>>
+
+func (self *Node) GetData() any {// <<<
+	return self.data
 }// >>>
 
 func (self *Node) SetText(txt string) *Node {// <<<
 	self.text = txt
 	return self
+}// >>>
+
+func (self *Node) GetText() string {// <<<
+	return self.text
 }// >>>
 
 func (self *Node) IsHidden() bool {// <<<
@@ -48,12 +66,12 @@ func (self *Node) GetChildren() []*Node {// <<<
 func (self *Node) GetChild(n int) *Node {// <<<
 	// child n= 1 is at index 0
 	// child n=-1 is the last child, len()-1
-	if n == 0 {
-		return nil
-	}
 
-	var Index = 0
+	var Index int
+
+	if n == 0 { return nil }
 	var NumOfChildren = len(self.children)
+	if NumOfChildren == 0 { return nil }
 
 	if n < 0 { // counting from end
 		Index = NumOfChildren + n
@@ -61,7 +79,7 @@ func (self *Node) GetChild(n int) *Node {// <<<
 		Index = n - 1
 	}
 
-	if Index > (NumOfChildren-1) { // out of range
+	if (Index < 0) || (Index >= NumOfChildren) { // out of range
 		return nil
 	}
 
@@ -82,14 +100,30 @@ func (self *Node) CountChildren(visible bool) int {// <<<
 	}
 }// >>>
 
-func (self *Node) AddChild(txt string) *Node {// <<<
-	Newborn := &Node{parent: self, text: txt, hidenode: false, hidechildren: false, depth: self.depth+1}
+func (self *Node) AddChild(d any) *Node {// <<<
+	var txt string
+
+	if str, ok := d.(fmt.Stringer); ok {
+		txt = str.String()
+	} else {
+		txt = fmt.Sprintf("%v", d)
+	}
+
+	Newborn := &Node{parent: self, data: d, text: txt, hidenode: false, hidechildren: false, depth: self.depth+1}
 	self.children = append(self.children, Newborn)
 	return Newborn
 }// >>>
 
-func (self *Node) AddSibling(txt string) *Node {// <<<
-	Newborn := &Node{parent: self.parent, text: txt, hidenode: false, hidechildren: false, depth: self.depth}
+func (self *Node) AddSibling(d any) *Node {// <<<
+	var txt string
+
+	if str, ok := d.(fmt.Stringer); ok {
+		txt = str.String()
+	} else {
+		txt = fmt.Sprintf("%v", d)
+	}
+
+	Newborn := &Node{parent: self.parent, data: d, text: txt, hidenode: false, hidechildren: false, depth: self.depth}
 	self.parent.children = append(self.parent.children, Newborn)
 	return Newborn
 }// >>>

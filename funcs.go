@@ -36,7 +36,12 @@ type Entry struct {// <<<
 	IsSmaller  map[string]bool
 	IsNewer    map[string]bool
 	IsOlder    map[string]bool
-}// >>>
+}
+
+func (self Entry) String() string {
+	return fmt.Sprintf("%s", self.Name)
+}
+// >>>
 
 var ( // <<<
 	NameRegEx *regexp.Regexp = regexp.MustCompile("[^/]+/?$")
@@ -105,26 +110,6 @@ func isDirectory(dirpath string) bool {// <<<
 		return false
 	}
 	return fileInfo.IsDir()
-}// >>>
-
-func removeDuplicates(sortedSlice *[]string) {// TODO delete <<<
-
-	if len(*sortedSlice) == 0 {
-		return
-	}
-
-	var WrIdx int = 0
-
-	for RdIdx := 1; RdIdx < len(*sortedSlice); RdIdx++ {
-
-		if (*sortedSlice)[RdIdx] != (*sortedSlice)[WrIdx] {
-			WrIdx = WrIdx + 1
-		}
-
-		(*sortedSlice)[WrIdx] = (*sortedSlice)[RdIdx]
-	}
-
-	 (*sortedSlice) = (*sortedSlice)[:WrIdx+1]
 }// >>>
 
 func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) {// <<<
@@ -236,7 +221,7 @@ func getUnionSetOfDirContents(left string, right string, ListOfPaths *[]string) 
 
 }// >>>
 
-func getDirContents(leftroot string, rightroot string, unionset *[]string, content *[]Entry) {// <<<
+func getDirContentInformation(leftroot string, rightroot string, unionset *[]string, content *[]Entry) {// <<<
 
 	*content = append(*content, Entry{ Path: map[string]string{ "left":  leftroot, "right": rightroot } } )
 
@@ -282,6 +267,7 @@ func getDirContents(leftroot string, rightroot string, unionset *[]string, conte
 		} else if IsDir != LeftFileInfo.IsDir() {
 			LeftIsMissing = true
 		} else {
+			// println(LeftPath, NormPath, Name, LeftFileInfo.Name())
 			if IsDir == false {
 				LeftSize       = LeftFileInfo.Size()
 				LeftModTime    = LeftFileInfo.ModTime()
@@ -294,6 +280,7 @@ func getDirContents(leftroot string, rightroot string, unionset *[]string, conte
 		} else if IsDir != RightFileInfo.IsDir() {
 			RightIsMissing = true
 		} else {
+			// println(RightPath, NormPath, Name, RightFileInfo.Name())
 			if IsDir == false {
 				RightSize       = RightFileInfo.Size()
 				RightModTime    = RightFileInfo.ModTime()
@@ -420,112 +407,263 @@ func decorateText(entry *Entry, side string) string {// <<<
 	return (*entry).Name
 }// >>>
 
-func convertSliceToTree(content *[]Entry, side string) *tree.Tree {// <<<
+// func convertSliceToTree(content *[]Entry, side string) *tree.Tree {// <<<
+//
+// 	var Result = tree.NewTree(StyleRoot.Render((*content)[0].Path[side]))
+// 	// var Result = tree.NewTree(&((*content)[0])).SetText(StyleRoot.Render((*content)[0].Path[side]))
+// 	var Stack []*tree.Node
+// 	var LastDepth     int = 0
+// 	var CurrentDepth  int = 0
+// 	var HideEntry     bool= false
+// 	var HideFile      bool= false
+// 	var HideDir       bool= false
+//
+// 	Stack = append(Stack, &(Result.Node))
+//
+// 	for i := 1; i < len(*content); i++ {
+//
+// 		HideFile  = false
+// 		HideEntry = false
+//
+// 		E := (*content)[i]
+//
+// 		CurrentDepth = strings.Count(E.NormPath, "/") // count slashes to determine current tree depth
+// 		if E.IsDir {
+// 			CurrentDepth = CurrentDepth - 1
+// 		}
+//
+// 		if CurrentDepth > LastDepth { // push new child onto stack
+// 			Stack = append(Stack, Stack[LastDepth].GetChild(-1))
+// 			LastDepth = CurrentDepth
+// 		} else if CurrentDepth < LastDepth { // pop from stack as many as we go directories upwards
+//
+// 			if Arg_HideEmpty {
+// 				for i:=(len(Stack)-1) ; i>=(len(Stack)-(LastDepth-CurrentDepth)); i-- {
+// 					if Stack[i].CountChildren(true) == 0 {
+// 						Stack[i].HideNode(true)
+// 					} else {
+// 						println(Stack[i].GetText(), Stack[i].CountChildren(true))
+// 					}
+// 				}
+// 			}
+//
+// 			Stack = Stack[:len(Stack)-(LastDepth-CurrentDepth)]
+// 			LastDepth = CurrentDepth
+// 			HideDir = false
+// 		} else {
+//
+// 			if Arg_HideEmpty {
+// 				// check if previous sibling is empty folder
+// 				// println(len(Stack)-1, CurrentDepth)
+// 				// println(Stack[CurrentDepth].GetChild(-1))
+// 				println(Stack[CurrentDepth].GetChild(-1).GetData())
+// 				// if Stack[len(Stack)-1].GetChild(-1).GetData().IsDir {
+// 				// 	if Stack[len(Stack)-1].GetChild(-1).CountChildren(true) == 0 {
+// 				// 		Stack[len(Stack)-1].GetChild(-1).HideNode(true)
+// 				// 	}
+// 				// }
+// 			}
+//
+// 			if E.IsDir {
+// 				HideDir = false
+// 			}
+// 		}
+//
+// 		// show only orphans
+// 		if Arg_Orphans && (!E.IsOrphan["left"] && !E.IsOrphan["right"]) {
+// 			if E.IsDir {
+// 				HideDir = true
+// 			} else {
+// 				HideFile = true
+// 			}
+// 		} 
+//
+// 		// show only none-orphans
+// 		if Arg_NoOrphans && ((E.IsOrphan["left"]) || (E.IsOrphan["right"])) {
+// 			if E.IsDir {
+// 				HideDir = true
+// 			} else {
+// 				HideFile = true
+// 			}
+// 		} 
+//
+// 		// show only left orphans
+// 		if Arg_LeftOrphans {
+// 			if E.IsDir {
+// 				if E.IsMissing["left"] {
+// 					HideDir = true
+// 				}
+// 			} else {
+// 				if E.IsMissing["left"] || (!E.IsMissing["left"] && !E.IsMissing["right"]) {
+// 					HideFile = true
+// 				}
+// 			} 
+// 		} 
+//
+// 		// show only right orphans
+// 		if Arg_RightOrphans {
+// 			if E.IsDir {
+// 				if E.IsMissing["right"] {
+// 					HideDir = true
+// 				}
+// 			} else {
+// 				if E.IsMissing["right"] || (!E.IsMissing["left"] && !E.IsMissing["right"]) {
+// 					HideFile = true
+// 				}
+// 			} 
+// 		} 
+//
+// 		// show only files with differences
+// 		if Arg_Diff && (E.IsDir == false) && (E.Checksum["left"] == E.Checksum["right"]) {
+// 			HideFile = true
+// 		} 
+//
+// 		// show only files that are same
+// 		if Arg_Same && (E.IsDir == false) && (E.Checksum["left"] != E.Checksum["right"]) {
+// 			HideFile = true
+// 		} 
+//
+// 		HideEntry = HideFile || HideDir
+// 		Stack[LastDepth].AddChild(&E).SetText(decorateText(&E, side)).HideNode(HideEntry)
+// 	}
+//
+// 	return Result
+// }// >>>
+
+func convertSliceToTree(content *[]Entry, side string) *tree.Tree { // <<<
 
 	var Result = tree.NewTree(StyleRoot.Render((*content)[0].Path[side]))
 	var Stack []*tree.Node
 	var LastDepth     int = 0
 	var CurrentDepth  int = 0
-	var DecoratedText string
-	var HideEntry     bool= false
-	var HideFile      bool= false
-	var HideDir       bool= false
 
 	Stack = append(Stack, &(Result.Node))
 
 	for i := 1; i < len(*content); i++ {
+		
+		E := (*content)[i]
 
-		HideFile  = false
-		HideEntry = false
-
-		Entry := (*content)[i]
-
-		CurrentDepth = strings.Count(Entry.NormPath, "/") // count slashes to determine current tree depth
-		if Entry.IsDir {
+		CurrentDepth = strings.Count(E.NormPath, "/") // count slashes
+		if E.IsDir {
 			CurrentDepth = CurrentDepth - 1
 		}
 
 		if CurrentDepth > LastDepth { // push new child onto stack
 			Stack = append(Stack, Stack[LastDepth].GetChild(-1))
 			LastDepth = CurrentDepth
-		} else if CurrentDepth < LastDepth { // pop from stack as many as we go directories upwards
+		} else if CurrentDepth < LastDepth { // // pop from stack as many as we go directories upwards
 			Stack = Stack[:len(Stack)-(LastDepth-CurrentDepth)]
 			LastDepth = CurrentDepth
-			HideDir = false
-		} else {
-			if Entry.IsDir {
-				HideDir = false
-			}
 		}
 
-		DecoratedText = decorateText(&Entry, side)
-
-		// show only orphans
-		if Arg_Orphans && (!Entry.IsOrphan["left"] && !Entry.IsOrphan["right"]) {
-			if Entry.IsDir {
-				HideDir = true
-			} else {
-				HideFile = true
-			}
-		} 
-
-		// show only none-orphans
-		if Arg_NoOrphans && ((Entry.IsOrphan["left"]) || (Entry.IsOrphan["right"])) {
-			if Entry.IsDir {
-				HideDir = true
-			} else {
-				HideFile = true
-			}
-		} 
-
-		// show only left orphans
-		if Arg_LeftOrphans {
-			if Entry.IsDir {
-				if Entry.IsMissing["left"] {
-					HideDir = true
-				}
-			} else {
-				if Entry.IsMissing["left"] || (!Entry.IsMissing["left"] && !Entry.IsMissing["right"]) {
-					HideFile = true
-				}
-			} 
-		} 
-
-		// show only right orphans
-		if Arg_RightOrphans {
-			if Entry.IsDir {
-				if Entry.IsMissing["right"] {
-					HideDir = true
-				}
-			} else {
-				if Entry.IsMissing["right"] || (!Entry.IsMissing["left"] && !Entry.IsMissing["right"]) {
-					HideFile = true
-				}
-			} 
-		} 
-
-		// show only files with differences
-		if Arg_Diff && (Entry.IsDir == false) && (Entry.Checksum["left"] == Entry.Checksum["right"]) {
-			HideFile = true
-		} 
-
-		// show only files that are same
-		if Arg_Same && (Entry.IsDir == false) && (Entry.Checksum["left"] != Entry.Checksum["right"]) {
-			HideFile = true
-		} 
-
-		HideEntry = HideFile || HideDir
-		Stack[LastDepth].AddChild(DecoratedText).HideNode(HideEntry)
+		Stack[LastDepth].AddChild(&E).SetText(decorateText(&E, side))
 	}
 
 	return Result
 }// >>>
+
+func filterTrees(leftNode *tree.Node, rightNode *tree.Node) {// <<<
+// filterTrees recursively filters *both* trees simultaneously to keep them aligned.
+// It works "bottom-up" (post-order traversal).
+
+	// --- 1. Recurse First (Bottom-Up) ---
+	// We assume the trees have an identical structure, as they were built
+	// from the same slice. We must iterate them together.
+	if len(leftNode.GetChildren()) != len(rightNode.GetChildren()) {
+		// This should never happen if build logic is correct, but it's a safe check.
+		return
+	}
+
+	for i := 0; i < len(leftNode.GetChildren()); i++ {
+		// GetChild() is 1-based, so we use i+1
+		filterTrees(leftNode.GetChild(i+1), rightNode.GetChild(i+1))
+	}
+
+	// --- 2. Get Data & Handle Root ---
+	// Root nodes (the paths) are never hidden.
+	if leftNode.GetParent() == nil {
+		return
+	}
+
+	// Both nodes point to the *same* Entry struct,
+	// so we only need to get the data from one.
+	data, ok := leftNode.GetData().(*Entry)
+	if !ok {
+		// This shouldn't happen, but it's safe to skip if it does.
+		return
+	}
+	E := data // E for Entry
+
+	var shouldHide bool = false // A single decision for both nodes
+
+	// --- 3. Universal Filters (Orphans) ---
+	// This logic is unchanged, as it's already based on the combined Entry.
+	if Arg_Orphans && (!E.IsOrphan["left"] && !E.IsOrphan["right"]) {
+		shouldHide = true
+	} else if Arg_NoOrphans && (E.IsOrphan["left"] || E.IsOrphan["right"]) {
+		shouldHide = true
+	} else if Arg_LeftOrphans && !E.IsOrphan["left"] {
+		// "Show only left orphans" -> hide if NOT a left orphan
+		shouldHide = true
+	} else if Arg_RightOrphans && !E.IsOrphan["right"] {
+		// "Show only right orphans" -> hide if NOT a right orphan
+		shouldHide = true
+	}
+
+	// --- 4. Type-Specific Filters ---
+	if E.IsDir {
+		// --- Directory-specific filters ---
+		if Arg_Files { // Hide all folders if -files is set
+			shouldHide = true
+		}
+
+		// --- Hide Empty (THE KEY FIX) ---
+		// A directory is only hidden if it's considered empty on *both* sides.
+		// Since child nodes are already filtered, CountChildren(true) is accurate.
+		if !shouldHide && Arg_HideEmpty {
+			if leftNode.CountChildren(true) == 0 && rightNode.CountChildren(true) == 0 {
+				shouldHide = true
+			}
+		}
+
+	} else {
+		// --- File-specific filters ---
+		if Arg_Folders { // Hide all files if -folders is set
+			shouldHide = true
+		}
+
+		// Only check diff/same if the file isn't already hidden
+		if !shouldHide {
+			if Arg_Diff && (E.Checksum["left"] == E.Checksum["right"]) {
+				// "Show only diff" -> hide if same
+				shouldHide = true
+			} else if Arg_Same && (E.Checksum["left"] != E.Checksum["right"]) {
+				// "Show only same" -> hide if diff
+				shouldHide = true
+			}
+		}
+	}
+
+	// --- 5. Apply the Filter (Synchronized) ---
+	// Apply the *same* decision to both nodes.
+	leftNode.HideNode(shouldHide)
+	rightNode.HideNode(shouldHide)
+}// >>>
+
+// func resetTreeVisibility(node *tree.Node) {<<<
+// 	node.HideNode(false)
+// 	for _, child := range node.GetChildren() {
+// 		resetTreeVisibility(child)
+// 	}
+// }>>>
 
 func printSideBySide(contents *[]Entry) {// <<<
 
 	var LeftTree  = convertSliceToTree(contents, "left")
 	var RightTree = convertSliceToTree(contents, "right")
 	var Output string
+
+	filterTrees(&LeftTree.Node, &RightTree.Node)
 
 	if Arg_Swap {
 		LeftTree, RightTree = RightTree, LeftTree
@@ -587,6 +725,15 @@ func Testing() {// <<<
 	for node := range T.Iterate(filter) {
 		println(node.GetText(), node.GetDepth())
 	}
+
+	// T.GetChild(-1)
+	// println(T.GetChild(-1))
+	// println(T.GetChild(1).GetText())
+	// println(T.GetChild(2).GetText())
+	// println(T.GetChild(3).GetText())
+	// println(T.GetChild(-1).GetText())
+	// println(T.GetChild(-2).GetText())
+	// println(T.GetChild(-3).GetText())
 }// >>>
 
 // vim: fdm=marker fmr=<<<,>>>

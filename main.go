@@ -9,14 +9,14 @@ import ( // <<<
 ) // >>>
 
 // global variables, constants and types <<<
-const Tool_s    string = "diffdir"
+const Tool_s    string = "diffee"
 const Version_s string = "0.1.0"
 const (
 	OK int = iota
 	INTERNAL
 	TOO_MANY_ARGS
 	NOT_A_DIR
-	EXLUSIVE_OPTS
+	EXCLUSIVE_OPTS
 )
 type RegExes []*regexp.Regexp
 var (
@@ -37,6 +37,7 @@ var (
 	Arg_RightOrphans bool
 	Arg_Files        bool
 	Arg_Folders      bool
+	Arg_HideEmpty    bool
 	Arg_Diff         bool
 	Arg_Same         bool
 	Arg_Exclude      RegExes
@@ -59,12 +60,12 @@ func (n *RegExes) Set(value string) error {
 func main() {
 
 	// variables <<<
-	var Left  string
-	var Right string
-	var XORDiffType   int = 0
-	var XOROrphanType int = 0
+	var LeftDir               string
+	var RightDir              string
+	var XORDiffType           int = 0
+	var XOROrphanType         int = 0
 	var UnionSetOfDirContents []string
-	var DirContents []Entry
+	var DirContentInformation []Entry
 	// >>>
 
 	// parse cli args <<<
@@ -87,6 +88,7 @@ func main() {
 	flag.BoolVar(&Arg_RightOrphans  , "left-missing"    , false, "show only left missing, same as -right-orphans")
 	flag.BoolVar(&Arg_Files         , "files"           , false, "show only files, no empty folders"             )
 	flag.BoolVar(&Arg_Folders       , "folders"         , false, "show only folders"                             )
+	flag.BoolVar(&Arg_HideEmpty     , "hide-empty"      , false, "hide empty folders"                            )
 	flag.BoolVar(&Arg_Diff          , "diff"            , false, "show only files that differ"                   )
 	flag.BoolVar(&Arg_Same          , "same"            , false, "show only files that are the same"             )
 	flag.Var    (&Arg_Exclude       , "exclude"         ,        "exclude matching paths from diff"              )
@@ -111,7 +113,7 @@ func main() {
 	if Arg_CRC32 { XORDiffType += 1 }
 	if XORDiffType > 1 {
 		printError("-size, -time and -crc32 are mutual exclusive, use only one")
-		os.Exit(EXLUSIVE_OPTS)
+		os.Exit(EXCLUSIVE_OPTS)
 	}
 
 	if Arg_Orphans      { XOROrphanType += 1 }
@@ -120,17 +122,17 @@ func main() {
 	if Arg_RightOrphans { XOROrphanType += 1 }
 	if XOROrphanType > 1 {
 		printError("-orphans, -no-orphans, -left-orphans/-right-missing and -right-orphans/-left-missing can not be used together, use only one")
-		os.Exit(EXLUSIVE_OPTS)
+		os.Exit(EXCLUSIVE_OPTS)
 	}
 
 	if Arg_Diff && Arg_Same {
 		printError("-diff and -same can not be used together, use only one")
-		os.Exit(EXLUSIVE_OPTS)
+		os.Exit(EXCLUSIVE_OPTS)
 	}
 
 	if Arg_Files && Arg_Folders {
 		printError("-files and -folders can not be used together, use only one")
-		os.Exit(EXLUSIVE_OPTS)
+		os.Exit(EXCLUSIVE_OPTS)
 	}
 	// >>>
 
@@ -156,45 +158,45 @@ func main() {
 
 	// get directory paths from args <<<
 	if flag.NArg() == 1 {
-		Left  = "./"
-		Right = path.Clean(flag.Arg(0)) + "/"
+		LeftDir  = "./"
+		RightDir = path.Clean(flag.Arg(0)) + "/"
 	} else { // 2 args given
-		Left  = path.Clean(flag.Arg(0)) + "/"
-		Right = path.Clean(flag.Arg(1)) + "/"
+		LeftDir  = path.Clean(flag.Arg(0)) + "/"
+		RightDir = path.Clean(flag.Arg(1)) + "/"
 	}
 	// >>>
 
 	// check if dirs exists <<<
-	if isDirectory(Left) == false {
+	if isDirectory(LeftDir) == false {
 		printError("left is not a directory")
 		os.Exit(NOT_A_DIR)
 	}
 
-	if isDirectory(Right) == false {
+	if isDirectory(RightDir) == false {
 		printError("right is not a directory")
 		os.Exit(NOT_A_DIR)
 	}
 	// >>>
 
 	// get dir contents <<<
-	getUnionSetOfDirContents(Left, Right, &UnionSetOfDirContents)
-	getDirContents(Left, Right, &UnionSetOfDirContents, &DirContents)
+	getUnionSetOfDirContents(LeftDir, RightDir, &UnionSetOfDirContents)
+	getDirContentInformation(LeftDir, RightDir, &UnionSetOfDirContents, &DirContentInformation)
 	// >>>
 
 	// print flat comparison <<<
 	if Arg_Flat {
-		printFlat(&DirContents)
+		printFlat(&DirContentInformation)
 		os.Exit(OK)
 	}// >>>
 	
 	// start interactive comparison <<<
 	// if Interactive {
-		// runInteractive(&DirContents)
+		// runInteractive(&DirContentInformation)
 		// os.Exit(OK)
 	// } // >>>
 
 	// print side by side comparison <<<
-	printSideBySide(&DirContents)
+	printSideBySide(&DirContentInformation)
 	os.Exit(OK)
 	// >>>
 
