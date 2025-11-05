@@ -42,7 +42,6 @@ var (
 	Arg_Same         bool
 	Arg_Exclude      RegExes
 	Arg_Include      RegExes
-	Arg_Test         bool
 )
 // >>>
 
@@ -93,7 +92,6 @@ func main() {
 	flag.BoolVar(&Arg_Same          , "same"            , false, "show only files that are the same"             )
 	flag.Var    (&Arg_Exclude       , "exclude"         ,        "exclude matching paths from diff"              )
 	flag.Var    (&Arg_Include       , "include"         ,        "exclude non-matching paths from diff"          )
-	flag.BoolVar(&Arg_Test          , "test"            , false, "testing Hide function"                         )
 	flag.Parse()
 	// >>>
 
@@ -101,11 +99,6 @@ func main() {
 	if flag.NArg() > 2 {
 		printError("too many args")
 		os.Exit(TOO_MANY_ARGS)
-	}
-
-	if Arg_Test {
-		Testing()
-		os.Exit(OK)
 	}
 
 	if Arg_Size  { XORDiffType += 1 }
