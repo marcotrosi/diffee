@@ -67,11 +67,11 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 |`-e`/`--no-empty`     | do not show empty folders                        |
 |`-o`/`--orphans`      | show only orphans                                |
 |`-O`/`--no-orphans`   | do not show orphans                              |
-|`-l`/`--left-orphans` | show only left orphans, same as --right-missing  |
-|`-R`/`--right-missing`| show only right missing, same as --left-orphans  |
-|`-r`/`--right-orphans`| show only right orphans, same as --left-missing  |
-|`-L`/`--left-missing` | show only left missing, same as --right-orphans  |
-|`-p`/`--plain`        | print differences in plain format</br>use --single-quotes/-q or --double-quotes/-Q to wrap in quotes</br>useful in combination with xargs |
+|`-l`/`--left-orphans` | show only left orphans, same as `--right-missing`|
+|`-R`/`--right-missing`| show only right missing, same as `--left-orphans`|
+|`-r`/`--right-orphans`| show only right orphans, same as `--left-missing`|
+|`-L`/`--left-missing` | show only left missing, same as `--right-orphans`|
+|`-p`/`--plain`        | print differences in plain format</br>use `--single-quotes`/`-q` or `--double-quotes`/`-Q` to wrap in quotes</br>useful in combination with xargs |
 |`-q`/`--single-quotes`| wrap plain output in single quotes               |
 |`-Q`/`--double-quotes`| wrap plain output in double quotes               |
 
@@ -89,7 +89,7 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 |-----------------|-------------------------|
 |`-x`/`--swap`    | swap sides              |
 |`-n`/`--info`    | print file diff info    |
-|`-C`/`--no-color`| turn colored output off</b>overwrites NO_COLOR |
+|`-C`/`--no-color`| turn colored output off</b>overwrites `NO_COLOR` |
 
 
 ## ToDo
