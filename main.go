@@ -9,8 +9,8 @@ import ( // <<<
 ) // >>>
 
 // global variables, constants and types <<<
-const Tool_s    string = "diffee"
-const Version_s string = "0.1.0"
+const Version string = "0.1.0"
+
 const (
 	OK int = iota
 	INTERNAL
@@ -19,11 +19,16 @@ const (
 	NOT_A_DIR
 	EXCLUSIVE_OPTS
 )
+
+var QuoteChar string = ""
+
 type RegExes []*regexp.Regexp
 var (
 	Arg_Version      bool
 	Arg_Help         bool
-	Arg_Flat         bool
+	Arg_Plain        bool
+	Arg_SingleQuotes bool
+	Arg_DoubleQuotes bool
 	Arg_All          bool
 	Arg_Size         bool
 	Arg_Time         bool
@@ -75,22 +80,22 @@ func main() {
 
 	// parse cli args <<<
 	rootCmd := &cobra.Command{
-		Use:   Tool_s,
+		Use:   "diffee [left_dir] <right_dir>",
 		Short: "Diff directories",
 		Run: func(cmd *cobra.Command, args []string) {
 
 			// check cli args <<<
 			if Arg_Version {
-				fmt.Println(Version_s)
-				return
-			}
-
-			if Arg_Help {
-				cmd.Help()
+				fmt.Println(Version)
 				return
 			}
 
 			if Arg_Bash {
+				return
+			}
+
+			if Arg_Help || (len(args) == 0) {
+				cmd.Help()
 				return
 			}
 
@@ -125,6 +130,11 @@ func main() {
 				printError("--files and --folders can not be used together, use only one")
 				os.Exit(EXCLUSIVE_OPTS)
 			}
+
+			if Arg_SingleQuotes && Arg_DoubleQuotes {
+				printError("--single-quotes and --double-quotes can not be used together, use only one")
+				os.Exit(EXCLUSIVE_OPTS)
+			}
 			// >>>
 
 			// no color <<<
@@ -150,12 +160,12 @@ func main() {
 
 			// check if dirs exists <<<
 			if isDirectory(LeftDir) == false {
-				printError("left is not a directory")
+				printError(fmt.Sprintf("given path '%s' is not a directory", LeftDir))
 				os.Exit(NOT_A_DIR)
 			}
 
 			if isDirectory(RightDir) == false {
-				printError("right is not a directory")
+				printError(fmt.Sprintf("given path '%s' is not a directory", RightDir))
 				os.Exit(NOT_A_DIR)
 			}
 			// >>>
@@ -165,9 +175,17 @@ func main() {
 			getDirContentInformation(LeftDir, RightDir, &UnionSetOfDirContents, &DirContentInformation)
 			// >>>
 
-			// print flat comparison <<<
-			if Arg_Flat {
-				printFlat(&DirContentInformation)
+			// print plain output <<<
+			if Arg_Plain {
+				if Arg_SingleQuotes {
+					QuoteChar = "'"
+				}
+
+				if Arg_DoubleQuotes {
+					QuoteChar = "\""
+				}
+
+				printPlain(&DirContentInformation, QuoteChar)
 				os.Exit(OK)
 			}// >>>
 
@@ -187,34 +205,39 @@ func main() {
 	// >>>
 
 	// commandline parameter definition <<<
-	// flags (bools)
+	// general
 	rootCmd.Flags().BoolVarP(&Arg_Version      , "version"      , "v", false , "print version")
-	rootCmd.Flags().BoolVarP(&Arg_Flat         , "flat"         , "T", false , "print differences flat")
+	rootCmd.Flags().BoolVarP(&Arg_Bash         , "bash"         , "b", false , "generate bash-completion script")
+	// control input
 	rootCmd.Flags().BoolVarP(&Arg_All          , "all"          , "a", false , "don't ignore dotfiles")
-	rootCmd.Flags().BoolVarP(&Arg_Size         , "size"         , "s", false , "compare file size")
-	rootCmd.Flags().BoolVarP(&Arg_Time         , "time"         , "t", false , "compare modification time")
-	rootCmd.Flags().BoolVarP(&Arg_CRC32        , "crc32"        , "c", false , "compare CRC32 checksum")
-	rootCmd.Flags().BoolVarP(&Arg_Info         , "info"         , "n", false , "print file diff info")
-	rootCmd.Flags().BoolVarP(&Arg_Swap         , "swap"         , "x", false , "swap sides")
-	rootCmd.Flags().IntVarP(&Arg_Depth         , "depth"        , "p", 0     , "limit depth, 0 is no limit")
-	rootCmd.Flags().BoolVarP(&Arg_NoColor      , "no-color"     , "C", false , "turn colored output off")
+	rootCmd.Flags().IntVarP(&Arg_Depth         , "depth"        , "D", 0     , "limit depth, 0 is no limit and the default")
+	rootCmd.Flags().VarP(&Arg_Include          , "include"      , "I",         "include matching paths into diff, if --include and --exclude are used together then --include is applied first")
+	rootCmd.Flags().VarP(&Arg_Exclude          , "exclude"      , "E",         "exclude matching paths from diff, if --include and --exclude are used together then --include is applied first")
+	// control output
+	rootCmd.Flags().BoolVarP(&Arg_Diff         , "diff"         , "d", false , "show only files that differ")
+	rootCmd.Flags().BoolVarP(&Arg_Same         , "same"         , "m", false , "show only files that are the same")
+	rootCmd.Flags().BoolVarP(&Arg_Files        , "files"        , "f", false , "show only files")
+	rootCmd.Flags().BoolVarP(&Arg_Folders      , "folders"      , "F", false , "show only folders")
+	rootCmd.Flags().BoolVarP(&Arg_NoEmpty      , "no-empty"     , "e", false , "do not show empty folders")
 	rootCmd.Flags().BoolVarP(&Arg_Orphans      , "orphans"      , "o", false , "show only orphans")
 	rootCmd.Flags().BoolVarP(&Arg_NoOrphans    , "no-orphans"   , "O", false , "do not show orphans")
 	rootCmd.Flags().BoolVarP(&Arg_LeftOrphans  , "left-orphans" , "l", false , "show only left orphans, same as --right-missing")
 	rootCmd.Flags().BoolVarP(&Arg_LeftOrphans  , "right-missing", "R", false , "show only right missing, same as --left-orphans")
 	rootCmd.Flags().BoolVarP(&Arg_RightOrphans , "right-orphans", "r", false , "show only right orphans, same as --left-missing")
 	rootCmd.Flags().BoolVarP(&Arg_RightOrphans , "left-missing" , "L", false , "show only left missing, same as --right-orphans")
-	rootCmd.Flags().BoolVarP(&Arg_Files        , "files"        , "f", false , "show only files")
-	rootCmd.Flags().BoolVarP(&Arg_Folders      , "folders"      , "F", false , "show only folders")
-	rootCmd.Flags().BoolVarP(&Arg_NoEmpty      , "no-empty"     , "E", false , "do not show empty folders")
-	rootCmd.Flags().BoolVarP(&Arg_Diff         , "diff"         , "d", false , "show only files that differ")
-	rootCmd.Flags().BoolVarP(&Arg_Same         , "same"         , "m", false , "show only files that are the same")
-	rootCmd.Flags().BoolVarP(&Arg_Bash         , "bash"         , "b", false , "generate bash-completion script")
-
-	// multi-value flags
-	rootCmd.Flags().Var(&Arg_Exclude, "exclude", "exclude matching paths from diff")
-	rootCmd.Flags().Var(&Arg_Include, "include", "exclude non-matching paths from diff")
+	rootCmd.Flags().BoolVarP(&Arg_Plain        , "plain"        , "p", false , "print differences in plain format, use --single-quotes/-q or --double-quotes/-Q to wrap in quotes, useful in combination with xargs")
+	rootCmd.Flags().BoolVarP(&Arg_SingleQuotes , "single-quotes", "q", false , "wrap plain output in single quotes")
+	rootCmd.Flags().BoolVarP(&Arg_DoubleQuotes , "double-quotes", "Q", false , "wrap plain output in double quotes")
+	// control comparison
+	rootCmd.Flags().BoolVarP(&Arg_Size         , "size"         , "s", false , "compare file size")
+	rootCmd.Flags().BoolVarP(&Arg_Time         , "time"         , "t", false , "compare modification time")
+	rootCmd.Flags().BoolVarP(&Arg_CRC32        , "crc32"        , "c", false , "compare CRC32 checksum")
+	// control display
+	rootCmd.Flags().BoolVarP(&Arg_Swap         , "swap"         , "x", false , "swap sides")
+	rootCmd.Flags().BoolVarP(&Arg_Info         , "info"         , "n", false , "print file diff info")
+	rootCmd.Flags().BoolVarP(&Arg_NoColor      , "no-color"     , "C", false , "turn colored output off, overwrites NO_COLOR")
 	// >>>
+
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

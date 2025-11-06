@@ -55,38 +55,8 @@ var ( // <<<
 	StyleDiff    = lipgloss.NewStyle().Foreground(lipgloss.Color("13"))
 ) // >>>
 
-func printHelp() {// <<<
-	var HelpText []string = []string {
-		"Usage:",
-		"  diffee [options] [left_dir] right_dir",
-		"",
-		"Options:",
-		"  -version           print version",
-		"  -help              print help",
-		"  -flat              print differences flat",
-		"  -all               don't ignore dotfiles",
-		"  -depth int         limit depth, 0 is no limit",
-		"  -info              print file diff info",
-		"  -swap              swap sides",
-		"  -no-color          turn colored output off",
-		"  -include value     exclude non-matching paths from diff",
-		"  -exclude value     exclude matching paths from diff",
-		"  -files             show only files, no empty dirs",
-		"  -crc32             compare CRC32 checksum",
-		"  -size              compare file size",
-		"  -time              compare modification time",
-		"  -no-orphans        do not show orphans",
-		"  -orphans           show only orphans",
-		"  -diff              show only files that differ",
-		"  -same              show only files that are the same" }
-
-	for i := range(HelpText) {
-		fmt.Println(HelpText[i])
-	}
-}// >>>
-
 func printError(msg string) {// <<<
-	fmt.Fprintln(os.Stderr, Tool_s + " error: " + msg)
+	fmt.Fprintln(os.Stderr, "diffee error: " + msg)
 }// >>>
 
 func setNoColor() {// <<<
@@ -553,8 +523,7 @@ func printSideBySide(contents *[]Entry) {// <<<
 	fmt.Println(Output)
 }// >>>
 
-func printFlat(contents *[]Entry) {// <<<
-	var QuoteChar string = "'"
+func printPlain(contents *[]Entry, QuoteChar string) {// <<<
 	leftroot  := (*contents)[0].Path["left"]
 	rightroot := (*contents)[0].Path["right"]
 	for i:=1; i < len(*contents); i++ {

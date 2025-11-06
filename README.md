@@ -27,52 +27,74 @@ so I decided to write my own tree renderer.
 
 ## Overview
 
-By default `diffee` does a static side-by-side comparison with a colored tree view. But it also offers a flat view
-(`-flat`) which is useful to pipe the text into the next command.
+By default `diffee` does a static side-by-side comparison with a colored tree view. But it also offers a plain format
+(`--plain`) which is useful to pipe the text into the next command like `xargs`.
 
 
 ## Usage
 
-    diffee [options] [left_dir] right_dir
+    diffee [left_dir] <right_dir> [flags]
 
 Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working directory is used as `left_dir`.
 
 
 ## Options
+### General
 
-|             Option             | Description                                                                                                                                                              |
-|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `--version`/`-v`               | Print version.                                                                                                                                                           |
-| `--help`/`-h`                  | Print help.                                                                                                                                                              |
-| `--flat`/`-T`                  | Print flat diff, without tree view.                                                                                                                                      |
-| `--all`/`-a`                   | By default hidden folders/files (dotfiles) are ignored, this option turns this behavior off.                                                                             |
-| `--depth <value>`/`-p <value>` | By default directory trees are traversed recursively all the way down, which is the same as `-depth 0`. But the depth can also be limited by providing a non-zero value. |
-| `--info`/`-n`                  | Print information on differences (checksum, size, modtime).                                                                                                              |
-| `--swap`/`-x`                  | Swap sides.                                                                                                                                                              |
-| `--no-color`/`-C`              | Print without colors.                                                                                                                                                    |
-| `--include <regex>`            | Include paths that match the regex pattern. Can be used multiple times.                                                                                                  |
-| `--exclude <regex>`            | Exclude paths that match the regex pattern. If `--include` is used `--exclude` is applied on paths matching the _include regex_. Can be used multiple times.             |
-| `--files`/`-f`                 | Only show files.                                                                                                                                                         |
-| `--folders`/`-F`               | Only show folders.                                                                                                                                                       |
-| `--no-empty`/`-E`              | Do not show empty folders.                                                                                                                                               |
-| `--crc32`/`-c`                 | Use crc32 checksum to detect if files are different.                                                                                                                     |
-| `--size`/`-s`                  | Use file size to detect if files are different.                                                                                                                          |
-| `--time`/`-t`                  | Use modification time to detect if files are different.                                                                                                                  |
-| `--orphans`/`-o`               | Only show orphans.                                                                                                                                                       |
-| `--no-orphans`/`-O`            | Do not show orphans.                                                                                                                                                     |
-| `--left-orphans`/`-l`          | Show only left orphans, same as --right-missing.                                                                                                                         |
-| `--right-missing`/`-R`         | Show only right missing, same as --left-orphans.                                                                                                                         |
-| `--right-orphans`/`-r`         | Show only right orphans, same as --left-missing.                                                                                                                         |
-| `--left-missing`/`-L`          | Show only left missing, same as --right-orphans.                                                                                                                         |
-| `--diff`/`-d`                  | Show only differences, hide same files.                                                                                                                                  |
-| `--same`/`-m`                  | Show only same files, hide files with differences.                                                                                                                       |
-| `--bash`/`-b`                  | Generate bash-completion script.                                                                                                                                         |
+| Option         | Description                     |
+|----------------|---------------------------------|
+|`-h`/`--help`   | print help                      |
+|`-v`/`--version`| print version                   |
+|`-b`/`--bash`   | generate bash-completion script |
+
+### Control Input
+
+| Option         | Description                                |
+|----------------|--------------------------------------------|
+|`-a`/`--all`    | don't ignore dotfiles                      |
+|`-D`/`--depth`  | limit depth, 0 is no limit and the default |
+|`-I`/`--include`| include matching paths into diff</br>if `--include` and `--exclude` are used together then `--include` is applied first |
+|`-E`/`--exclude`| exclude matching paths from diff</br>if `--include` and `--exclude` are used together then `--include` is applied first |
+
+### Control Output
+
+| Option               | Description                                      |
+|----------------------|--------------------------------------------------|
+|`-d`/`--diff`         | show only files that differ                      |
+|`-m`/`--same`         | show only files that are the same                |
+|`-f`/`--files`        | show only files                                  |
+|`-F`/`--folders`      | show only folders                                |
+|`-e`/`--no-empty`     | do not show empty folders                        |
+|`-o`/`--orphans`      | show only orphans                                |
+|`-O`/`--no-orphans`   | do not show orphans                              |
+|`-l`/`--left-orphans` | show only left orphans, same as --right-missing  |
+|`-R`/`--right-missing`| show only right missing, same as --left-orphans  |
+|`-r`/`--right-orphans`| show only right orphans, same as --left-missing  |
+|`-L`/`--left-missing` | show only left missing, same as --right-orphans  |
+|`-p`/`--plain`        | print differences in plain format</br>use --single-quotes/-q or --double-quotes/-Q to wrap in quotes</br>useful in combination with xargs |
+|`-q`/`--single-quotes`| wrap plain output in single quotes               |
+|`-Q`/`--double-quotes`| wrap plain output in double quotes               |
+
+### Control Comparison
+
+| Option       | Description               |
+|--------------|---------------------------|
+|`-s`/`--size` | compare file size         |
+|`-t`/`--time` | compare modification time |
+|`-c`/`--crc32`| compare CRC32 checksum    |
+
+### Control Display
+
+| Option          | Description             |
+|-----------------|-------------------------|
+|`-x`/`--swap`    | swap sides              |
+|`-n`/`--info`    | print file diff info    |
+|`-C`/`--no-color`| turn colored output off</b>overwrites NO_COLOR |
 
 
 ## ToDo
 
 ### Improvements
-- `-q`/`-Q` to wrap flat print in `'` and `"` quotes?
 - combine diff states and use enums (I don't remember what thought I had)
 - how to handle big depths that don't fit on screen?
 - Maybe the performance can be improved by using multi-threading?
