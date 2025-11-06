@@ -28,7 +28,7 @@ so I decided to write my own tree renderer.
 ## Overview
 
 By default `diffee` does a static side-by-side comparison with a colored tree view. But it also offers a plain format
-(`--plain`) which is useful to pipe the text into the next command like `xargs`.
+(`--plain`) which is useful to pipe the text into the next command like _xargs_.
 
 
 ## Usage
@@ -71,7 +71,7 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 |`-R`/`--right-missing`| show only right missing, same as `--left-orphans`|
 |`-r`/`--right-orphans`| show only right orphans, same as `--left-missing`|
 |`-L`/`--left-missing` | show only left missing, same as `--right-orphans`|
-|`-p`/`--plain`        | print differences in plain format</br>use `--single-quotes`/`-q` or `--double-quotes`/`-Q` to wrap in quotes</br>useful in combination with xargs |
+|`-p`/`--plain`        | print differences in plain format</br>use `--single-quotes`/`-q` or `--double-quotes`/`-Q` to wrap in quotes</br>useful in combination with _xargs_ |
 |`-q`/`--single-quotes`| wrap plain output in single quotes               |
 |`-Q`/`--double-quotes`| wrap plain output in double quotes               |
 
@@ -95,7 +95,7 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 ## ToDo
 
 ### Improvements
-- combine diff states and use enums (I don't remember what thought I had)
+- combine diff states and use enums
 - how to handle big depths that don't fit on screen?
 - Maybe the performance can be improved by using multi-threading?
 
