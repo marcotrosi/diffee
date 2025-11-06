@@ -72,7 +72,6 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 ## ToDo
 
 ### Improvements
-- use no color hint given at Github
 - `-q`/`-Q` to wrap flat print in `'` and `"` quotes?
 - combine diff states and use enums (I don't remember what thought I had)
 - how to handle big depths that don't fit on screen?

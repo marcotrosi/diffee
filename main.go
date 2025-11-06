@@ -130,6 +130,10 @@ func main() {
 			// no color <<<
 			if Arg_NoColor {
 				setNoColor()
+			} else {
+				if Value, Exists := os.LookupEnv("NO_COLOR"); Exists && Value != "" {
+					setNoColor()
+				}
 			}
 			// >>>
 
