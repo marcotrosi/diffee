@@ -71,21 +71,19 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 
 ## ToDo
 
-- default diff detection by size followed by checksum if size is same
+### Improvements
 - use no color hint given at Github
-- config file for default flags and colors
-- finish -flat, -q/-Q to wrap in ' and " quote
-- combine diff states and use enums
-- second `--all` or `--All/-A` to also not skip .git folders?
-- `-I` like `--respect-vcs-ignore`
+- `-q`/`-Q` to wrap flat print in `'` and `"` quotes?
+- combine diff states and use enums (I don't remember what thought I had)
 - how to handle big depths that don't fit on screen?
-- ignore casing on Windows if ever supported, highlight orange if different
-- ignore casing `-i/-c` can it be useful for unixoids?
 - Maybe the performance can be improved by using multi-threading?
 
-- document code/workflow/strategy
-- write system and unit tests
-
+### Features
+- config file and/or env vars for default flags and colors
+- second `--all` or `--All/-A` to also not skip .git folders?
+- `-I` like `--respect-vcs-ignore` (see fd / rg options)
+- ignore casing on Windows if ever supported, highlight orange if different
+- ignore casing `-i/-c`. (short option name already in use)
 - create diff report (html, pdf)
 - `--interactive/-i` interactive mode to bring it much closer to `Beyond Compare`.
     - has to use some kind of view/window in case the tree doesn't fit on its half side
@@ -100,5 +98,5 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 	- navigate tree
 	- open/close folders
 	- swap sides
-	- --filediffcmd="icdiff {} {}"  and/or config/env var
+	- `--filediffcmd="icdiff {} {}"`  and/or config/env var
 
