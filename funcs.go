@@ -440,6 +440,9 @@ func convertSliceToTree(content *[]Entry, side string) *tree.Tree { // <<<
 }// >>>
 
 func filterTrees(leftNode *tree.Node, rightNode *tree.Node) {// <<<
+// THIS FUNCTION WAS GENERATED USING AI BASED ON A PREVIOUS FUNCTION.
+// THE CODE SEEMS TO MAKE SENSE AND SEEMS TO WORK.
+
 // filterTrees recursively filters *both* trees simultaneously to keep them aligned.
 // It works "bottom-up" (post-order traversal).
 
@@ -494,7 +497,7 @@ func filterTrees(leftNode *tree.Node, rightNode *tree.Node) {// <<<
 			shouldHide = true
 		}
 
-		// --- Hide Empty (THE KEY FIX) ---
+		// --- Hide Empty Dirs ---
 		// A directory is only hidden if it's considered empty on *both* sides.
 		// Since child nodes are already filtered, CountChildren(true) is accurate.
 		if !shouldHide && Arg_NoEmpty {
@@ -551,10 +554,11 @@ func printSideBySide(contents *[]Entry) {// <<<
 }// >>>
 
 func printFlat(contents *[]Entry) {// <<<
+	var QuoteChar string = "'"
 	leftroot  := (*contents)[0].Path["left"]
 	rightroot := (*contents)[0].Path["right"]
 	for i:=1; i < len(*contents); i++ {
-		fmt.Printf("%q %q\n", leftroot+(*contents)[i].Path["left"], rightroot+(*contents)[i].Path["right"])
+		fmt.Printf("%s%s%s %s%s%s\n", QuoteChar, leftroot+(*contents)[i].Path["left"], QuoteChar, QuoteChar, rightroot+(*contents)[i].Path["right"], QuoteChar)
 	}
 }// >>>
 

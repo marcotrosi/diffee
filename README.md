@@ -44,10 +44,10 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 |--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `--version`/`-v`               | Print version.                                                                                                                                                           |
 | `--help`/`-h`                  | Print help.                                                                                                                                                              |
-| `--flat`/`-I`                  | Print flat diff, without tree view.                                                                                                                                      |
+| `--flat`/`-T`                  | Print flat diff, without tree view.                                                                                                                                      |
 | `--all`/`-a`                   | By default hidden folders/files (dotfiles) are ignored, this option turns this behavior off.                                                                             |
 | `--depth <value>`/`-p <value>` | By default directory trees are traversed recursively all the way down, which is the same as `-depth 0`. But the depth can also be limited by providing a non-zero value. |
-| `--info`/`-i`                  | Print information on differences (checksum, size, modtime).                                                                                                              |
+| `--info`/`-n`                  | Print information on differences (checksum, size, modtime).                                                                                                              |
 | `--swap`/`-x`                  | Swap sides.                                                                                                                                                              |
 | `--no-color`/`-C`              | Print without colors.                                                                                                                                                    |
 | `--include <regex>`            | Include paths that match the regex pattern. Can be used multiple times.                                                                                                  |
