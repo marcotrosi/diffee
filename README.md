@@ -92,6 +92,11 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 |`-C`/`--no-color`| turn colored output off</b>overwrites `NO_COLOR` |
 
 
+## Building `diffee`
+
+    go build
+
+
 ## ToDo
 
 ### Improvements
