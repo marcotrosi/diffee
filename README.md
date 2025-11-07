@@ -49,12 +49,12 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 
 ### Control Input
 
-| Option         | Description                                |
-|----------------|--------------------------------------------|
-|`-a`/`--all`    | don't ignore dotfiles                      |
-|`-D`/`--depth`  | limit depth, 0 is no limit and the default |
-|`-I`/`--include`| include matching paths into diff</br>if `--include` and `--exclude` are used together then `--include` is applied first |
-|`-E`/`--exclude`| exclude matching paths from diff</br>if `--include` and `--exclude` are used together then `--include` is applied first |
+| Option                         | Description                                |
+|--------------------------------|--------------------------------------------|
+|`-a`/`--all`                    | don't ignore dotfiles                      |
+|`-D`/`--depth`                  | limit depth, 0 is no limit and the default |
+|`-I <regex>`/`--include <regex>`| include matching paths into diff</br>can be used multiple times</br>if `--include` and `--exclude` are used together then `--include` is applied first |
+|`-E <regex>`/`--exclude <regex>`| exclude matching paths from diff</br>can be used multiple times</br>if `--include` and `--exclude` are used together then `--include` is applied first |
 
 ### Control Output
 

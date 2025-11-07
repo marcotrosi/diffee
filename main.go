@@ -211,8 +211,8 @@ func main() {
 	// control input
 	rootCmd.Flags().BoolVarP(&Arg_All          , "all"          , "a", false , "don't ignore dotfiles")
 	rootCmd.Flags().IntVarP(&Arg_Depth         , "depth"        , "D", 0     , "limit depth, 0 is no limit and the default")
-	rootCmd.Flags().VarP(&Arg_Include          , "include"      , "I",         "include matching paths into diff, if --include and --exclude are used together then --include is applied first")
-	rootCmd.Flags().VarP(&Arg_Exclude          , "exclude"      , "E",         "exclude matching paths from diff, if --include and --exclude are used together then --include is applied first")
+	rootCmd.Flags().VarP(&Arg_Include          , "include"      , "I",         "include matching paths into diff, can be used multiple times, if --include and --exclude are used together then --include is applied first")
+	rootCmd.Flags().VarP(&Arg_Exclude          , "exclude"      , "E",         "exclude matching paths from diff, can be used multiple times, if --include and --exclude are used together then --include is applied first")
 	// control output
 	rootCmd.Flags().BoolVarP(&Arg_Diff         , "diff"         , "d", false , "show only files that differ")
 	rootCmd.Flags().BoolVarP(&Arg_Same         , "same"         , "m", false , "show only files that are the same")
