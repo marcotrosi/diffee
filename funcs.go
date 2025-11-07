@@ -1,6 +1,7 @@
 package main
 
-import ( // <<<
+// imports <<<
+import (
 	"os"
 	"io/fs"
 	"fmt"
@@ -16,7 +17,24 @@ import ( // <<<
 	"diffee/tree"
 ) // >>>
 
-type Entry struct {// <<<
+// Enums <<<
+type SizeDiffState int
+const (
+    SameSize SizeDiffState = iota
+    Bigger
+    Smaller
+)
+
+type TimeDiffState int
+const (
+	SameTime TimeDiffState = iota
+	Newer
+	Older
+)
+// >>>
+
+// Entry struct <<<
+type Entry struct {
 	// same for left and right
 	NormPath   string
 	Name       string
@@ -32,10 +50,8 @@ type Entry struct {// <<<
 
 	IsMissing  map[string]bool
 	IsOrphan   map[string]bool
-	IsBigger   map[string]bool
-	IsSmaller  map[string]bool
-	IsNewer    map[string]bool
-	IsOlder    map[string]bool
+	SizeDiff   map[string]SizeDiffState
+	TimeDiff   map[string]TimeDiffState
 }
 
 func (self Entry) String() string {
@@ -43,7 +59,8 @@ func (self Entry) String() string {
 }
 // >>>
 
-var ( // <<<
+// Variables <<<
+var (
 	NameRegEx *regexp.Regexp = regexp.MustCompile("[^/]+/?$")
 	StyleRoot    = lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
 	StyleMissing = lipgloss.NewStyle().Foreground(lipgloss.Color("4"))
@@ -53,7 +70,20 @@ var ( // <<<
 	StyleNewer   = lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
 	StyleOlder   = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	StyleDiff    = lipgloss.NewStyle().Foreground(lipgloss.Color("13"))
-) // >>>
+
+	SizeStyles = map[SizeDiffState]lipgloss.Style{
+		SameSize: lipgloss.NewStyle(),
+		Bigger:   StyleBigger,
+		Smaller:  StyleSmaller,
+	}
+
+	TimeStyles = map[TimeDiffState]lipgloss.Style{
+		SameTime: lipgloss.NewStyle(),
+		Newer:    StyleNewer,
+		Older:    StyleOlder,
+	}
+)
+// >>>
 
 func printError(msg string) {// <<<
 	fmt.Fprintln(os.Stderr, "diffee error: " + msg)
@@ -217,20 +247,16 @@ func getDirContentInformation(leftroot string, rightroot string, unionset *[]str
 		var LeftChecksum   string    = ""
 		var LeftIsOrphan   bool      = false
 		var LeftIsMissing  bool      = false
-		var LeftIsBigger   bool      = false
-		var LeftIsSmaller  bool      = false
-		var LeftIsNewer    bool      = false
-		var LeftIsOlder    bool      = false
+		var LeftSizeState  SizeDiffState = SameSize
+		var LeftTimeState  TimeDiffState = SameTime
 
 		var RightSize      int64     = 0
 		var RightModTime   time.Time = time.Time{}
 		var RightChecksum  string    = ""
 		var RightIsOrphan  bool      = false
 		var RightIsMissing bool      = false
-		var RightIsBigger  bool      = false
-		var RightIsSmaller bool      = false
-		var RightIsNewer   bool      = false
-		var RightIsOlder   bool      = false
+		var RightSizeState  SizeDiffState = SameSize
+		var RightTimeState  TimeDiffState = SameTime
 
 		if LErr != nil {
 			LeftIsMissing = true
@@ -262,10 +288,17 @@ func getDirContentInformation(leftroot string, rightroot string, unionset *[]str
 			RightIsOrphan = true
 		} else {
 			if IsDir == false {
-				LeftIsBigger  = (LeftSize > RightSize)
-				LeftIsSmaller = (LeftSize < RightSize)
-				LeftIsNewer   = LeftModTime.After(RightModTime)
-				LeftIsOlder   = LeftModTime.Before(RightModTime)
+				if LeftSize > RightSize {
+					LeftSizeState = Bigger
+				} else if LeftSize < RightSize {
+					LeftSizeState = Smaller
+				}
+
+				if LeftModTime.After(RightModTime) {
+					LeftTimeState = Newer
+				} else if LeftModTime.Before(RightModTime) {
+					LeftTimeState = Older
+				}
 			}
 		}
 
@@ -273,32 +306,38 @@ func getDirContentInformation(leftroot string, rightroot string, unionset *[]str
 			LeftIsOrphan = true
 		} else {
 			if IsDir == false {
-				RightIsBigger  = (RightSize > LeftSize)
-				RightIsSmaller = (RightSize < LeftSize)
-				RightIsNewer   = RightModTime.After(LeftModTime)
-				RightIsOlder   = RightModTime.Before(LeftModTime)
+				if RightSize > LeftSize {
+					RightSizeState = Bigger
+				} else if RightSize < LeftSize {
+					RightSizeState = Smaller
+				}
+
+				if RightModTime.After(LeftModTime) {
+					RightTimeState = Newer
+				} else if RightModTime.Before(LeftModTime) {
+					RightTimeState = Older
+				}
 			}
 		}
 
-		NewEntry := Entry{
+		NewEntry := Entry {
+
 			NormPath  : NormPath,
 			Name      : Name,
 			IsDir     : IsDir,
 			IsDotfile : IsDotfile,
 			IsDiff    : (LeftChecksum != RightChecksum),
-                        
-			Path     : map[string]string   { "left": LeftPath     , "right": RightPath      },
-			Size     : map[string]int64    { "left": LeftSize     , "right": RightSize      },
-			ModTime  : map[string]time.Time{ "left": LeftModTime  , "right": RightModTime   },
-			Checksum : map[string]string   { "left": LeftChecksum , "right": RightChecksum  },
-			IsMissing: map[string]bool     { "left": LeftIsMissing, "right": RightIsMissing },
-			IsOrphan : map[string]bool     { "left": LeftIsOrphan , "right": RightIsOrphan  },
-			IsBigger : map[string]bool     { "left": LeftIsBigger , "right": RightIsBigger  },
-			IsSmaller: map[string]bool     { "left": LeftIsSmaller, "right": RightIsSmaller },
-			IsNewer  : map[string]bool     { "left": LeftIsNewer  , "right": RightIsNewer   },
-			IsOlder  : map[string]bool     { "left": LeftIsOlder  , "right": RightIsOlder   }}
 
-		*content  = append(*content, NewEntry)
+			Path     : map[string]string        { "left": LeftPath     , "right": RightPath      },
+			Size     : map[string]int64         { "left": LeftSize     , "right": RightSize      },
+			ModTime  : map[string]time.Time     { "left": LeftModTime  , "right": RightModTime   },
+			Checksum : map[string]string        { "left": LeftChecksum , "right": RightChecksum  },
+			IsMissing: map[string]bool          { "left": LeftIsMissing, "right": RightIsMissing },
+			IsOrphan : map[string]bool          { "left": LeftIsOrphan , "right": RightIsOrphan  },
+			SizeDiff : map[string]SizeDiffState { "left": LeftSizeState, "right": RightSizeState },
+			TimeDiff : map[string]TimeDiffState { "left": LeftTimeState, "right": RightTimeState }}
+
+			*content  = append(*content, NewEntry)
 	}
 
 }// >>>
@@ -309,72 +348,41 @@ func decorateText(entry *Entry, side string) string {// <<<
 		return StyleMissing.Render(strings.Repeat("░", len((*entry).Name)))
 	}
 
+	var Style lipgloss.Style = lipgloss.NewStyle()
+	var Info string = ""
+
 	if (*entry).IsOrphan[side] {
-		return StyleOrphan.Render((*entry).Name)
-	}
+		Style = StyleOrphan
 
-	if Arg_Size {
+	} else {
 
-		if Arg_Info {
+		if Arg_Size {
+			State := (*entry).SizeDiff[side]
+			Style = SizeStyles[State]
 
-			if (*entry).IsBigger[side] {
-				return StyleBigger.Render((*entry).Name) + " (" + strconv.FormatInt(int64((*entry).Size[side]), 10) + " bytes)"
+			if Arg_Info && State != SameSize {
+				Info = " (" + strconv.FormatInt(int64((*entry).Size[side]), 10) + " bytes)"
 			}
 
-			if (*entry).IsSmaller[side] {
-				return StyleSmaller.Render((*entry).Name) + " (" + strconv.FormatInt(int64((*entry).Size[side]), 10) + " bytes)"
-			}
-		} else {
+		} else if Arg_Time {
+			State := (*entry).TimeDiff[side]
+			Style = TimeStyles[State]
 
-			if (*entry).IsBigger[side] {
-				return StyleBigger.Render((*entry).Name)
-			}
-
-			if (*entry).IsSmaller[side] {
-				return StyleSmaller.Render((*entry).Name)
-			}
-		}
-	}
-
-	if Arg_Time {
-
-		if Arg_Info {
-
-			if (*entry).IsNewer[side] {
-				return StyleNewer.Render((*entry).Name) + " (" + (*entry).ModTime[side].Format(time.RFC3339) + ")"
+			if Arg_Info && State != SameTime {
+				Info = " (" + (*entry).ModTime[side].Format(time.RFC3339) + ")"
 			}
 
-			if (*entry).IsOlder[side] {
-				return StyleOlder.Render((*entry).Name) + " (" + (*entry).ModTime[side].Format(time.RFC3339) + ")"
-			}
-		} else {
-
-			if (*entry).IsNewer[side] {
-				return StyleNewer.Render((*entry).Name)
-			}
-
-			if (*entry).IsOlder[side] {
-				return StyleOlder.Render((*entry).Name)
-			}
-		}
-	}
-
-	if Arg_CRC32 {
-
-		if Arg_Info {
-
+		} else if Arg_CRC32 {
 			if (*entry).IsDiff {
-				return StyleDiff.Render((*entry).Name) + " (" + (*entry).Checksum[side] + ")"
-			}
-		} else {
-
-			if (*entry).IsDiff {
-				return StyleDiff.Render((*entry).Name)
+				Style = StyleDiff
+				if Arg_Info {
+					Info = " (" + (*entry).Checksum[side] + ")"
+				}
 			}
 		}
 	}
 
-	return (*entry).Name
+	return Style.Render((*entry).Name) + Info
 }// >>>
 
 func convertSliceToTree(content *[]Entry, side string) *tree.Tree { // <<<
@@ -484,10 +492,29 @@ func filterTrees(leftNode *tree.Node, rightNode *tree.Node) {// <<<
 
 		// Only check diff/same if the file isn't already hidden
 		if !shouldHide {
-			if Arg_Diff && (E.Checksum["left"] == E.Checksum["right"]) {
+			// 1. Determine the "isSame" status based on the active comparison mode
+			var isSame bool = false // Default to "different"
+
+			if Arg_Size {
+				// It's "same" if BOTH sides show SameSize.
+				// (Note: For orphans, one side won't be SameSize, so this is safe)
+				isSame = (E.SizeDiff["left"] == SameSize && E.SizeDiff["right"] == SameSize)
+
+			} else if Arg_Time {
+				// It's "same" if BOTH sides show SameTime.
+				isSame = (E.TimeDiff["left"] == SameTime && E.TimeDiff["right"] == SameTime)
+
+			} else {
+				// Default to CRC32 comparison (or if no mode is selected)
+				// You can just use E.IsDiff here.
+				isSame = !E.IsDiff 
+			}
+
+			// 2. Apply the filter logic
+			if Arg_Diff && isSame {
 				// "Show only diff" -> hide if same
 				shouldHide = true
-			} else if Arg_Same && (E.Checksum["left"] != E.Checksum["right"]) {
+			} else if Arg_Same && !isSame {
 				// "Show only same" -> hide if diff
 				shouldHide = true
 			}

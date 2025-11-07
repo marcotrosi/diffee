@@ -95,12 +95,11 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 ## ToDo
 
 ### Improvements
-- combine diff states and use enums
 - how to handle big depths that don't fit on screen?
 - Maybe the performance can be improved by using multi-threading?
 
 ### Features
-- config file and/or env vars for default flags and colors
+- config file and/or env vars for default flags and colors - only if user feedback demands it
 - second `--all` or `--All/-A` to also not skip .git folders?
 - `-I` like `--respect-vcs-ignore` (see fd / rg options)
 - ignore casing on Windows if ever supported, highlight orange if different
