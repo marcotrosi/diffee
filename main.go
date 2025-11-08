@@ -9,7 +9,7 @@ import ( // <<<
 ) // >>>
 
 // global variables, constants and types <<<
-const Version string = "0.1.0"
+const Version string = "0.1.1"
 
 const (
 	OK int = iota
