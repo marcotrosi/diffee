@@ -31,6 +31,13 @@ By default `diffee` does a static side-by-side comparison with a colored tree vi
 (`--plain`) which is useful to pipe the text into the next command like _xargs_.
 
 
+## Demo
+
+![demo](demo/demo.png)
+
+https://github.com/user-attachments/assets/7fb36169-0d7e-4329-ad94-3ab7a75329d0
+
+
 ## Usage
 
     diffee [left_dir] <right_dir> [flags]
