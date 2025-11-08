@@ -550,11 +550,66 @@ func printSideBySide(contents *[]Entry) {// <<<
 	fmt.Println(Output)
 }// >>>
 
+func shouldHideEntry(E *Entry) bool {// <<<
+// THIS FUNCTION WAS GENERATED USING AI BASED ON THE FILTERTREES() FUNCTION.
+// THE CODE SEEMS TO MAKE SENSE AND SEEMS TO WORK.
+	// --- 1. Universal Filters (Orphans) ---
+	if Arg_Orphans && (!E.IsOrphan["left"] && !E.IsOrphan["right"]) {
+		return true
+	} else if Arg_NoOrphans && (E.IsOrphan["left"] || E.IsOrphan["right"]) {
+		return true
+	} else if Arg_LeftOrphans && !E.IsOrphan["left"] {
+		return true
+	} else if Arg_RightOrphans && !E.IsOrphan["right"] {
+		return true
+	}
+
+	// --- 2. Type-Specific Filters ---
+	if E.IsDir {
+		if Arg_Files {
+			return true
+		}
+		// Note: Arg_NoEmpty cannot be checked here easily for flat view 
+		// without knowing about children. For flat view, we might just 
+		// ignore --no-empty, or we'd need a pre-pass. 
+		// For now, let's assume it doesn't apply to flat view or we accept it won't work there yet.
+	} else {
+		if Arg_Folders {
+			return true
+		}
+
+		// --- 3. Diff/Same Logic ---
+		var isSame bool = false
+		if Arg_Size {
+			isSame = (E.SizeDiff["left"] == SameSize && E.SizeDiff["right"] == SameSize)
+		} else if Arg_Time {
+			isSame = (E.TimeDiff["left"] == SameTime && E.TimeDiff["right"] == SameTime)
+		} else {
+			isSame = !E.IsDiff
+		}
+
+		if Arg_Diff && isSame {
+			return true
+		} else if Arg_Same && !isSame {
+			return true
+		}
+	}
+
+	return false
+}// >>>
+
 func printPlain(contents *[]Entry, QuoteChar string) {// <<<
-	leftroot  := (*contents)[0].Path["left"]
-	rightroot := (*contents)[0].Path["right"]
+	var Left  string = "left"
+	var Right string = "right"
+
+	if Arg_Swap {
+		Left, Right= Right, Left
+	}
+
 	for i:=1; i < len(*contents); i++ {
-		fmt.Printf("%s%s%s %s%s%s\n", QuoteChar, leftroot+(*contents)[i].Path["left"], QuoteChar, QuoteChar, rightroot+(*contents)[i].Path["right"], QuoteChar)
+      if !shouldHideEntry(&(*contents)[i]) {
+         fmt.Printf("%s%s%s %s%s%s\n", QuoteChar, (*contents)[i].Path[Left], QuoteChar, QuoteChar, (*contents)[i].Path[Right], QuoteChar)
+      }
 	}
 }// >>>
 

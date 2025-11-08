@@ -21,7 +21,7 @@ Therefore I created this tool with tools like
 
 This is the first and probably last time I used the _Go_ language and I have no clue if I used it properly. The reason why I used it
 instead of _C_ is because I wanted to use the _charmbracelet_ libs for colored output and rendering the directory trees.
-Unfortunately _liploss/tree_ [has/had some bugs](https://github.com/charmbracelet/lipgloss/discussions/452),
+Unfortunately _lipgloss/tree_ [has/had some bugs](https://github.com/charmbracelet/lipgloss/discussions/452),
 so I decided to write my own tree renderer.
 
 
