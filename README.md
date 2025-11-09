@@ -90,13 +90,13 @@ Compare `left_dir` to `right_dir`. If `left_dir` is omitted, the current working
 
 ### Control Display
 
-| Option             | Description                                        |
-|--------------------|----------------------------------------------------|
-|`-x`/`--swap`       | swap sides                                         |
-|`-n`/`--info`       | print file diff info                               |
-|`-C`/`--no-color`   | turn colored output off</b>overwrites `NO_COLOR`   |
-|`-l`/`--left-alias` | display the given string as left root folder name  |
-|`-r`/`--right-alias`| display the given string as right root folder name |
+| Option                               | Description                                        |
+|--------------------------------------|----------------------------------------------------|
+|`-x`/`--swap`                         | swap sides                                         |
+|`-n`/`--info`                         | print file diff info                               |
+|`-C`/`--no-color`                     | turn colored output off</b>overwrites `NO_COLOR`   |
+|`-l <string>`/`--left-alias <string>` | display the given string as left root folder name  |
+|`-r <string>`/`--right-alias <string>`| display the given string as right root folder name |
 
 
 ## Building `diffee`
