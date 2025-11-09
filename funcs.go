@@ -540,6 +540,13 @@ func printSideBySide(contents *[]Entry) {// <<<
 	var RightTree = convertSliceToTree(contents, "right")
 	var Output string
 
+	if Arg_LeftAlias != "" {
+		LeftTree.Node.SetText(StyleRoot.Render(Arg_LeftAlias))
+	}
+	if Arg_RightAlias != "" {
+		RightTree.Node.SetText(StyleRoot.Render(Arg_RightAlias))
+	}
+
 	filterTrees(&LeftTree.Node, &RightTree.Node)
 
 	if Arg_Swap {

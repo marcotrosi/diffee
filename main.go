@@ -9,7 +9,7 @@ import ( // <<<
 ) // >>>
 
 // global variables, constants and types <<<
-const Version string = "0.1.1"
+const Version string = "0.2.0"
 
 const (
 	OK int = iota
@@ -49,6 +49,8 @@ var (
 	Arg_Bash         bool
 	Arg_Exclude      RegExes
 	Arg_Include      RegExes
+	Arg_LeftAlias    string
+	Arg_RightAlias   string
 )
 // >>>
 
@@ -117,7 +119,7 @@ func main() {
 			if Arg_LeftOrphans  { XOROrphanType += 1 }
 			if Arg_RightOrphans { XOROrphanType += 1 }
 			if XOROrphanType > 1 {
-				printError("--orphans, --no-orphans, --left-orphans/--right-missing and --right-orphans/--left-missing can not be used together, use only one")
+				printError("--orphans, --no-orphans, --left-orphans and --right-orphans can not be used together, use only one")
 				os.Exit(EXCLUSIVE_OPTS)
 			}
 
@@ -221,10 +223,8 @@ func main() {
 	rootCmd.Flags().BoolVarP(&Arg_NoEmpty      , "no-empty"     , "e", false , "do not show empty folders")
 	rootCmd.Flags().BoolVarP(&Arg_Orphans      , "orphans"      , "o", false , "show only orphans")
 	rootCmd.Flags().BoolVarP(&Arg_NoOrphans    , "no-orphans"   , "O", false , "do not show orphans")
-	rootCmd.Flags().BoolVarP(&Arg_LeftOrphans  , "left-orphans" , "l", false , "show only left orphans, same as --right-missing")
-	rootCmd.Flags().BoolVarP(&Arg_LeftOrphans  , "right-missing", "R", false , "show only right missing, same as --left-orphans")
-	rootCmd.Flags().BoolVarP(&Arg_RightOrphans , "right-orphans", "r", false , "show only right orphans, same as --left-missing")
-	rootCmd.Flags().BoolVarP(&Arg_RightOrphans , "left-missing" , "L", false , "show only left missing, same as --right-orphans")
+	rootCmd.Flags().BoolVarP(&Arg_LeftOrphans  , "left-orphans" , "L", false , "show only left orphans")
+	rootCmd.Flags().BoolVarP(&Arg_RightOrphans , "right-orphans", "R", false , "show only right orphans")
 	rootCmd.Flags().BoolVarP(&Arg_Plain        , "plain"        , "p", false , "print differences in plain format, use --single-quotes/-q or --double-quotes/-Q to wrap in quotes, useful in combination with xargs")
 	rootCmd.Flags().BoolVarP(&Arg_SingleQuotes , "single-quotes", "q", false , "wrap plain output in single quotes")
 	rootCmd.Flags().BoolVarP(&Arg_DoubleQuotes , "double-quotes", "Q", false , "wrap plain output in double quotes")
@@ -236,6 +236,8 @@ func main() {
 	rootCmd.Flags().BoolVarP(&Arg_Swap         , "swap"         , "x", false , "swap sides")
 	rootCmd.Flags().BoolVarP(&Arg_Info         , "info"         , "n", false , "print file diff info")
 	rootCmd.Flags().BoolVarP(&Arg_NoColor      , "no-color"     , "C", false , "turn colored output off, overwrites NO_COLOR")
+	rootCmd.Flags().StringVarP(&Arg_LeftAlias  , "left-alias"   , "l", ""    , "display the given string as left root folder name")
+	rootCmd.Flags().StringVarP(&Arg_RightAlias , "right-alias"  , "r", ""    , "display the given string as right root folder name")
 	// >>>
 
 
