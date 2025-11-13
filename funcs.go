@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"github.com/codingsince1985/checksum"
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/term"
 	"diffee/tree"
 ) // >>>
 
@@ -82,6 +83,8 @@ var (
 		Newer:    StyleNewer,
 		Older:    StyleOlder,
 	}
+
+	RightSideOffset int = 10
 )
 // >>>
 
@@ -387,7 +390,8 @@ func decorateText(entry *Entry, side string) string {// <<<
 
 func convertSliceToTree(content *[]Entry, side string) *tree.Tree { // <<<
 
-	var Result = tree.NewTree(StyleRoot.Render((*content)[0].Path[side]))
+	// var Result = tree.NewTree(StyleRoot.Render((*content)[0].Path[side]))
+	var Result = tree.NewTree((*content)[0].Path[side])
 	var Stack []*tree.Node
 	var LastDepth     int = 0
 	var CurrentDepth  int = 0
@@ -534,18 +538,107 @@ func filterTrees(leftNode *tree.Node, rightNode *tree.Node) {// <<<
 // 	}
 // }>>>
 
+func shortenPath(left_path string, right_path string, max_width int) (string, string) {// <<<
+
+	// for now it's just a super dumb version that cuts of from the front until it fits into max_width
+	// I can later think a about a more sophisticated algorithm
+
+	// Separator := string(os.PathSeparator)
+
+	// /some/ass/long/path/a/     -> …/a/
+	// /some/ass/long/path/b/     -> …/b/
+                                 
+	// /some/ass/long/a/path/     -> …/a/…
+	// /some/ass/long/b/path/     -> …/b/…
+  
+	// /a/some/ass/long/path/     -> /a/…
+	// /b/some/ass/long/path/     -> /b/…
+                                 
+	// /some/ass/long/path/       -> …/long/…
+	// /some/ass/super/long/path/ -> …/super/…
+
+	// /some/ass/long/path/       -> …/path/
+	// /some/ass/long/path/ab/cd/ -> …/cd/
+
+	// AbsLeftPath, Err  := filepath.Abs(left_path) 
+	// if Err != nil {
+	// 	printError(fmt.Sprintf("could not get absolute path for '%s'", left_path))
+   //  }
+   //
+	// AbsRightPath, Err := filepath.Abs(right_path)
+	// if Err != nil {
+	// 	printError(fmt.Sprintf("could not get absolute path for '%s'", right_path))
+   //  }
+   //
+	// LeftPathParts  := strings.Split(AbsLeftPath , Separator)
+	// RightPathParts := strings.Split(AbsRightPath, Separator)
+
+	// LeftLen  := len(LeftPathParts)
+	// RightLen := len(RightPathParts)
+
+	// fmt.Println(LeftPathParts)
+	// fmt.Println(RightPathParts)
+
+	// fmt.Println(max_width, LeftLen, RightLen, len(LeftPath), len(RightPath))
+
+	LeftPath  := left_path
+	RightPath := right_path
+
+	if max_width == 0 {
+		return LeftPath,RightPath
+	}
+
+	LeftLen   := len(left_path)
+	RightLen  := len(right_path)
+
+	if LeftLen > max_width {
+		LeftPath = "…" + left_path[LeftLen-max_width+3:]
+	}
+
+	if RightLen > max_width {
+		RightPath = "…" + right_path[RightLen-max_width+3:]
+	}
+
+	return LeftPath,RightPath
+}// >>>
+
 func printSideBySide(contents *[]Entry) {// <<<
 
 	var LeftTree  = convertSliceToTree(contents, "left")
 	var RightTree = convertSliceToTree(contents, "right")
 	var Output string
 
+
+	LeftRoot  := (*contents)[0].Path["left"]
+	RightRoot := (*contents)[0].Path["right"]
+	var   LeftRootDisplay  string = LeftRoot
+	var   RightRootDisplay string = RightRoot
+
 	if Arg_LeftAlias != "" {
-		LeftTree.Node.SetText(StyleRoot.Render(Arg_LeftAlias))
+		LeftRootDisplay = Arg_LeftAlias
 	}
 	if Arg_RightAlias != "" {
-		RightTree.Node.SetText(StyleRoot.Render(Arg_RightAlias))
+		RightRootDisplay = Arg_RightAlias
 	}
+
+	// if Arg_ShortenRoot {
+		var ColumnWidth int = 0
+		TermWidth, _, Err := term.GetSize(0)
+		if Err == nil {
+			ColumnWidth = (TermWidth-RightSideOffset)/2
+		}
+
+		// if (len(LeftRootDisplay) > ColumnWidth) || (len(RightRootDisplay) > ColumnWidth) { // only shorten if necessary
+			LeftRootDisplay, RightRootDisplay = shortenPath(LeftRootDisplay, RightRootDisplay, ColumnWidth)
+		// }
+	// }
+
+	// if LeftRoot != LeftRootDisplay {
+	LeftTree.Node.SetText(StyleRoot.Render(LeftRootDisplay))
+	// }
+	// if RightRoot != RightRootDisplay {
+	RightTree.Node.SetText(StyleRoot.Render(RightRootDisplay))
+	// }
 
 	filterTrees(&LeftTree.Node, &RightTree.Node)
 
@@ -553,7 +646,7 @@ func printSideBySide(contents *[]Entry) {// <<<
 		LeftTree, RightTree = RightTree, LeftTree
 	}
 
-	Output = lipgloss.JoinHorizontal(lipgloss.Top, strings.Join(LeftTree.RenderTree(), "\n"), strings.Join(RightTree.SetRenderOffset(10).RenderTree(), "\n"))
+	Output = lipgloss.JoinHorizontal(lipgloss.Top, strings.Join(LeftTree.RenderTree(), "\n"), strings.Join(RightTree.SetRenderOffset(RightSideOffset).RenderTree(), "\n"))
 	fmt.Println(Output)
 }// >>>
 

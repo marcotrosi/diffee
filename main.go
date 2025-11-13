@@ -9,7 +9,7 @@ import ( // <<<
 ) // >>>
 
 // global variables, constants and types <<<
-const Version string = "0.2.0"
+const Version string = "0.3.0"
 
 const (
 	OK int = iota
@@ -35,6 +35,7 @@ var (
 	Arg_CRC32        bool
 	Arg_Info         bool
 	Arg_Swap         bool
+	// Arg_ShortenRoot  bool
 	Arg_Depth        int
 	Arg_NoColor      bool
 	Arg_Orphans      bool
@@ -238,6 +239,7 @@ func main() {
 	rootCmd.Flags().BoolVarP(&Arg_NoColor      , "no-color"     , "C", false , "turn colored output off, overwrites NO_COLOR")
 	rootCmd.Flags().StringVarP(&Arg_LeftAlias  , "left-alias"   , "l", ""    , "display the given string as left root folder name")
 	rootCmd.Flags().StringVarP(&Arg_RightAlias , "right-alias"  , "r", ""    , "display the given string as right root folder name")
+	// rootCmd.Flags().BoolVarP(&Arg_ShortenRoot  , "shorten-root" , "S", false , "shorten the root path if possible")
 	// >>>
 
 
